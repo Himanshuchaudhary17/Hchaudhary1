@@ -2,7 +2,11 @@
 
 ## Access Key Confirmation
 
-An AWS access key was successfully created for the IAM lab user for command-line access. The Access Key ID and Secret Access Key were stored securely and are not included in this repository.
+Access key successfully created for the IAM lab user.
+
+Access Key ID: AKIA****...**** (last 4 characters: NYXJ)
+
+The Secret Access Key is stored securely and is not included in this repository.
 
 ## Security Reflection
 
