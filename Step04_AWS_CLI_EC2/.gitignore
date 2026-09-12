@@ -1,0 +1,4 @@
+.env
+*.pem
+instance_ids.txt
+.DS_Store
