@@ -1,5 +1,25 @@
 # Week 3 - AWS CLI, EC2, and Environment Variables
 
+## Screenshot 1 - AWS CLI Command Breakdown
+
+![AWS CLI Command Breakdown](01_aws_cli_command_breakdown.png)
+
+## Screenshot 2 - EC2 Web Server
+
+![Hello Web Page](02_hello_web_page.png)
+
+## Screenshot 3 - .env and .gitignore Verification
+
+![Environment File Git Ignore](03_env_gitignore_status.png)
+
+## Screenshot 4 - Create EC2 Instances
+
+![Create Instances](04_create_instances.png)
+
+## Screenshot 5 - Delete EC2 Instances
+
+![Delete Instances](05_delete_instances.png)
+
 ## Environment File Security
 
 Environment files should be excluded from Git because they may contain credentials, secrets, account-specific identifiers, or other environment-specific configuration.
