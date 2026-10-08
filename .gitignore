@@ -1,2 +1,16 @@
 .DS_Store
 .DS_Store
+
+# AWS credentials and private keys
+.env
+*.pem
+*.key
+.aws/
+
+# Generated EC2 files
+*_instance_id.txt
+instance_ids.txt
+user-data-uploader.sh
+user-data-viewer.sh
+*-lt-data.json
+uploader-lt-v2.json
