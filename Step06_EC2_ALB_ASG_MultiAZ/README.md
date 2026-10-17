@@ -88,8 +88,7 @@ The deployment used two Availability Zones:
 - `us-east-2a`
 - `us-east-2b`
 
-Using more than one Availability Zone improves availability and makes the infrastructure more resilient.
-
+Using subnets in more than one Availability Zone allows the ALB and Auto Scaling architecture to use multiple AZs and improves the deployment’s resilience to infrastructure failures.
 ---
 
 ## 1. Stack Creation
