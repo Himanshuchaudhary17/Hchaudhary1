@@ -162,19 +162,11 @@ The Python cleanup script was executed using:
 
 `python delete_stack.py`
 
-The cleanup removed AWS resources including:
-
-- Auto Scaling Groups
-- Application Load Balancer
-- Target Groups
-- Launch Templates
-- IAM roles
-- Instance profiles
-- S3 resources
+The cleanup process removed the lab resources. Because AWS resource deletion is asynchronous, one Auto Scaling Group was still visible briefly immediately after the first cleanup command completed.
 
 ![Stack Cleanup First Run](screenshots/08_cleanup_first_run.png)
 
-A final verification was performed using AWS CLI commands to confirm that no lab resources remained.
+After AWS finished processing the deletion, a final verification was performed using AWS CLI commands.
 
 The final checks returned empty arrays for:
 
@@ -182,9 +174,9 @@ The final checks returned empty arrays for:
 - Auto Scaling Groups
 - lab IAM roles
 
-![Final AWS Cleanup Verification](screenshots/09_cleanup_final_verified.png)
+This confirmed that the remaining Auto Scaling Group had finished deleting and that no lab resources remained.
 
----
+![Final AWS Cleanup Verification](screenshots/09_cleanup_final_verified.png)
 
 ## Final Results
 
