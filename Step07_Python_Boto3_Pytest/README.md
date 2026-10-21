@@ -178,6 +178,16 @@ This confirmed that the remaining Auto Scaling Group had finished deleting and t
 
 ![Final AWS Cleanup Verification](screenshots/09_cleanup_final_verified.png)
 
+### Idempotent Cleanup Verification
+
+The cleanup script was executed again after the AWS resources had already been removed.
+
+`python delete_stack.py`
+
+The second execution completed successfully without errors, demonstrating that the Python cleanup process is idempotent and safe to run repeatedly.
+
+![Second Cleanup Run - Idempotent](screenshots/10_cleanup_second_run_idempotent.png)
+
 ## Final Results
 
 | Test / Validation | Result |
