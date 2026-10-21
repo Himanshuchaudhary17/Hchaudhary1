@@ -1,0 +1,12 @@
+.env
+stack_outputs.env
+*.pem
+*_instance_id.txt
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+__pycache__/
+.pytest_cache/
+stack_outputs.json
+stack_outputs.env
