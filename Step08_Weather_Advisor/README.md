@@ -1528,7 +1528,7 @@ pytest -q
 Final result:
 
 ```text
-23 passed, 20 deselected
+27 passed, 20 deselected
 ```
 
 ---
@@ -1588,7 +1588,7 @@ pytest -q -m integration
 Observed results:
 
 ```text
-23 passed, 20 deselected
+27 passed, 20 deselected
 
 18 passed, 25 deselected
 ```
@@ -1899,7 +1899,7 @@ Final result:
 
 | Test Category | Result |
 |---|---:|
-| Unit / Moto Tests | 23 passed |
+| Unit / Moto Tests | 27 passed |
 | Integration Tests | 18 passed |
 | Chaos Tests | 2 passed |
 | DB Failure Weather Response | 200 OK |
@@ -2294,7 +2294,7 @@ Final automated test results:
 
 ```text
 Unit / Moto:
-23 passed
+27 passed
 
 Integration:
 18 passed

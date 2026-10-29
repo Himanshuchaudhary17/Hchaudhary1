@@ -148,7 +148,7 @@ Although Python requires more lines of code, it provides safer and more maintain
 
 ```text
 Unit / moto tests:
-23 passed
+27 passed
 
 Integration tests:
 18 passed
