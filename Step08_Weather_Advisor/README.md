@@ -228,7 +228,7 @@ Command:
 ls -R | head -40
 ~~~
 
-This screenshot shows the final project folders, Python infrastructure scripts, application folders, testing files, and documentation.
+This screenshot shows the Step08 project directory and its main application, infrastructure, testing, and documentation files.
 
 ![Project Structure](screenshots/01_project_structure.png)
 
@@ -1541,7 +1541,7 @@ All checks returned no matching Step08 resources.
 
 ## Screenshot 14 — Final Cleanup Verification
 
-The screenshot shows the final AWS CLI cleanup queries returning no matching resources.
+The screenshot shows selected final AWS CLI cleanup checks returning no matching Step08 resources.
 
 ![Final Cleanup Verified](screenshots/14_final_cleanup_verified.png)
 
