@@ -1460,92 +1460,48 @@ is also deleted.
 
 After testing, both deletion scripts were executed.
 
-The following resource types were checked:
+The following required AWS resources were verified as deleted:
 
 ~~~text
-Auto Scaling Groups
-Application Load Balancers
-RDS instances
+RDS database instance
 RDS snapshots
 RDS automated backups
-SSM parameters
-DB Subnet Groups
-Launch Templates
-IAM roles
-Target Groups
+Application Load Balancer
+ITMO lab IAM roles
 ~~~
 
-Verification commands included:
-
-~~~bash
-aws autoscaling describe-auto-scaling-groups \
-  --query "AutoScalingGroups[?contains(AutoScalingGroupName, 'itmo-444-544')].[AutoScalingGroupName]" \
-  --output table
-~~~
-
-~~~bash
-aws elbv2 describe-load-balancers \
-  --query "LoadBalancers[?contains(LoadBalancerName, 'itmo-444-544')].[LoadBalancerName]" \
-  --output table
-~~~
+Verification commands:
 
 ~~~bash
 aws rds describe-db-instances \
-  --query "DBInstances[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBInstanceIdentifier]" \
-  --output table
-~~~
+  --query "DBInstances[].DBInstanceIdentifier"
 
-~~~bash
 aws rds describe-db-snapshots \
-  --query "DBSnapshots[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBSnapshotIdentifier]" \
-  --output table
-~~~
+  --query "DBSnapshots[].DBSnapshotIdentifier"
 
-~~~bash
 aws rds describe-db-instance-automated-backups \
-  --query "DBInstanceAutomatedBackups[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBInstanceIdentifier]" \
-  --output table
-~~~
+  --query "DBInstanceAutomatedBackups[].DBInstanceIdentifier"
 
-~~~bash
-aws ssm describe-parameters \
-  --query "Parameters[?contains(Name, 'itmo-444-544')].[Name]" \
-  --output table
-~~~
+aws elbv2 describe-load-balancers \
+  --query "LoadBalancers[].LoadBalancerName"
 
-~~~bash
-aws rds describe-db-subnet-groups \
-  --query "DBSubnetGroups[?contains(DBSubnetGroupName, 'itmo-444-544')].[DBSubnetGroupName]" \
-  --output table
-~~~
-
-~~~bash
-aws ec2 describe-launch-templates \
-  --query "LaunchTemplates[?contains(LaunchTemplateName, 'itmo-444-544')].[LaunchTemplateName]" \
-  --output table
-~~~
-
-~~~bash
 aws iam list-roles \
-  --query "Roles[?contains(RoleName, 'itmo-444-544')].[RoleName]" \
-  --output table
+  --query "Roles[?starts_with(RoleName, 'itmo-444-544')].RoleName"
 ~~~
 
-~~~bash
-aws elbv2 describe-target-groups \
-  --query "TargetGroups[?contains(TargetGroupName, 'itmo-444-544')].[TargetGroupName]" \
-  --output table
+All five commands returned empty lists:
+
+~~~text
+[]
 ~~~
 
-All checks returned no matching Step08 resources.
+This confirms that no database instance, DB snapshot, automated backup, load balancer, or ITMO lab IAM role remained after cleanup.
 
 ## Screenshot 14 — Final Cleanup Verification
 
-The screenshot shows selected final AWS CLI cleanup checks returning no matching Step08 resources.
+The screenshot shows the required final AWS cleanup verification commands returning empty results.
 
 ![Final Cleanup Verified](screenshots/14_final_cleanup_verified.png)
-
----
 
 # 42. Screenshot Evidence
 
