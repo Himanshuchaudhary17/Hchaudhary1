@@ -354,10 +354,20 @@ def delete_stack(
             tier,
         )
 
+    # Remove the Gemini API key parameter.
+    try:
+        aws.ssm.delete_parameter(
+            Name=settings.gemini_param_name
+        )
+        log.info(
+            "Deleted Gemini SSM parameter %s",
+            settings.gemini_param_name,
+        )
+    except aws.ssm.exceptions.ParameterNotFound:
+        log.info(
+            "Gemini SSM parameter already absent."
+        )
+
     StackOutputs.remove(
         Path(".")
-    )
-
-    log.info(
-        "Weather Advisor application stack deleted."
     )
