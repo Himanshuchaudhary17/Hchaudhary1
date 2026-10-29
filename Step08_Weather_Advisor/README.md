@@ -2,9 +2,9 @@
 
 ## ITMO 544 — Cloud Computing
 
-This project implements a complete two-tier cloud application called **Weather Advisor** using Python, AWS, Node.js, PostgreSQL, external weather APIs, Google Gemini, `pytest`, and `moto`.
+This project implements a two-tier cloud application called **Weather Advisor** using Python, boto3, AWS, Node.js, PostgreSQL, external weather APIs, Google Gemini, `pytest`, and `moto`.
 
-For the graduate ITMO 544 version of the lab, all AWS infrastructure resources are created and deleted using **Python and boto3** rather than Bash.
+For the graduate ITMO 544 version of the assignment, AWS infrastructure is created and deleted using **Python and boto3** rather than Bash scripts.
 
 The project demonstrates:
 
@@ -15,7 +15,7 @@ The project demonstrates:
 - PostgreSQL on Amazon RDS
 - AWS Systems Manager Parameter Store
 - Least-privilege IAM
-- External REST API integration
+- National Weather Service API integration
 - Google Gemini integration
 - PostgreSQL-backed caching
 - Graceful degradation
@@ -23,7 +23,7 @@ The project demonstrates:
 - Real AWS integration testing
 - Chaos testing
 - Automatic EC2 replacement and recovery
-- Secure network design
+- Secure networking
 - Idempotent infrastructure creation
 - Complete AWS resource cleanup
 
@@ -31,92 +31,92 @@ The project demonstrates:
 
 # 1. Project Overview
 
-The application contains two main services:
+The application contains two services:
 
 1. **Weather Service**
 2. **Advisor Service**
 
-The Weather service accepts a U.S. ZIP code, finds the location, retrieves weather information from the National Weather Service API, stores lookup history and cached weather data in PostgreSQL, and returns the forecast.
+The Weather service accepts a U.S. ZIP code, finds its location, retrieves weather information from the National Weather Service API, stores lookup history and cached weather data in PostgreSQL, and returns the current forecast.
 
-The Advisor service calls the Weather service and uses Google Gemini to generate clothing recommendations based on the current weather.
+The Advisor service calls the Weather service and uses Google Gemini to generate clothing recommendations based on the weather.
 
 Both services run on EC2 instances behind an AWS Application Load Balancer.
 
 ---
 
-# 2. High-Level Architecture
+# 2. Architecture
 
-```text
-                             User
-                              |
-                              v
-                 Application Load Balancer
-                    /                 \
-                   /                   \
-          Listener 8080             Listener 8081
-               |                         |
-               v                         v
-       Weather Target Group      Advisor Target Group
-               |                         |
-               v                         v
-          Weather EC2               Advisor EC2
-               |                         |
-        +------+------+                  |
-        |             |                  |
-        v             v                  |
-   Zippopotam      NWS API               |
-        |                                |
-        +-------> Weather Data            |
-                    |                     |
-                    v                     |
-             PostgreSQL RDS              |
-                    ^                     |
-                    |                     |
-                    +---------------------+
-                                          |
-                                          v
-                                    Google Gemini
-                                          |
-                                          v
-                              Clothing Recommendation
-```
+~~~text
+                              User
+                               |
+                               v
+                  Application Load Balancer
+                     /                 \
+                    /                   \
+           Listener 8080             Listener 8081
+                |                         |
+                v                         v
+        Weather Target Group      Advisor Target Group
+                |                         |
+                v                         v
+           Weather EC2               Advisor EC2
+                |                         |
+        +-------+-------+                 |
+        |               |                 |
+        v               v                 |
+    Zippopotam       NWS API              |
+        |                                 |
+        +--------> Weather Data            |
+                        |                  |
+                        v                  |
+                 PostgreSQL RDS            |
+                        ^                  |
+                        |                  |
+                        +------------------+
+                                           |
+                                           v
+                                     Google Gemini
+                                           |
+                                           v
+                                Clothing Recommendation
+~~~
 
-Public ALB listener ports:
+Public ALB listeners:
 
-```text
+~~~text
 8080 -> Weather Tier
 8081 -> Advisor Tier
-```
+~~~
 
-Both applications listen internally on:
+Both Node.js applications listen internally on:
 
-```text
+~~~text
 Port 3000
-```
+~~~
 
 PostgreSQL uses:
 
-```text
+~~~text
 Port 5432
-```
+~~~
 
 ---
 
-# 3. Application Request Flow
+# 3. Request Flow
 
-A normal Advisor request follows this flow:
+A normal Advisor request follows this path:
 
-```text
+~~~text
 User
  |
  v
-Application Load Balancer :8081
+ALB :8081
  |
  v
 Advisor Service
  |
  v
-Application Load Balancer :8080
+ALB :8080
  |
  v
 Weather Service
@@ -141,17 +141,17 @@ Clothing Recommendation
  |
  v
 User
-```
+~~~
 
-The Advisor service calls the Weather service through the Application Load Balancer instead of directly connecting to a Weather EC2 instance.
+The Advisor service communicates with the Weather service through the ALB instead of directly contacting an EC2 instance.
 
-This keeps the services loosely coupled and allows Auto Scaling to replace Weather instances without changing the Advisor configuration.
+This means Auto Scaling can replace a Weather instance without requiring any change to the Advisor configuration.
 
 ---
 
 # 4. Project Structure
 
-```text
+~~~text
 Step08_Weather_Advisor/
 |
 |-- advisor-app/
@@ -218,9 +218,17 @@ Step08_Weather_Advisor/
 |-- README.md
 |-- SUBMISSION_NOTES.md
 `-- .gitignore
-```
+~~~
 
 ## Screenshot 01 — Project Structure
+
+Command:
+
+~~~bash
+ls -R | head -40
+~~~
+
+This screenshot shows the final project folders, Python infrastructure scripts, application folders, testing files, and documentation.
 
 ![Project Structure](screenshots/01_project_structure.png)
 
@@ -228,30 +236,28 @@ Step08_Weather_Advisor/
 
 # 5. Python Infrastructure
 
-The graduate ITMO 544 version of the lab requires Python-based infrastructure automation.
+The main Python infrastructure scripts are:
 
-The main scripts are:
-
-```text
+~~~text
 create_database.py
 delete_database.py
 create_weather_stack.py
 delete_weather_stack.py
-```
+~~~
 
-All AWS resource creation and deletion is handled using boto3.
+AWS resources are created and deleted using **boto3**.
 
-AWS CLI commands are used only to verify deployed or deleted resources.
+AWS CLI commands are used only to inspect and verify resources.
 
 ---
 
 # 6. Configuration
 
-`stack/config.py` loads settings from `.env`.
+`stack/config.py` loads deployment settings from `.env`.
 
-Important settings include:
+Important configuration includes:
 
-```text
+~~~text
 AWS_REGION
 AMI_ID
 KEY_NAME
@@ -290,9 +296,9 @@ GEMINI_PARAM_NAME
 GEMINI_MODEL
 KEY_CACHE_SECONDS
 CONTACT_EMAIL
-```
+~~~
 
-Secrets are not stored in `.env`.
+Actual secret values are not stored in `.env`.
 
 ---
 
@@ -300,7 +306,7 @@ Secrets are not stored in `.env`.
 
 `stack/clients.py` creates boto3 clients for:
 
-```text
+~~~text
 EC2
 IAM
 ELBv2
@@ -309,36 +315,36 @@ RDS
 SSM
 STS
 S3
-```
+~~~
 
-STS is used to determine the AWS account ID when building IAM policy ARNs.
+STS is used to determine the AWS account ID when IAM ARNs are created.
 
 ---
 
 # 8. Weather Service
 
-The Weather service is written using:
+The Weather service uses:
 
-```text
+~~~text
 Node.js
 Express
 PostgreSQL
 AWS SDK for SSM
-```
+~~~
 
-Main endpoints:
+Endpoints:
 
-```text
+~~~text
 GET /
 GET /weather?zip=ZIPCODE
 GET /history
-```
+~~~
 
-The Weather service handles:
+The service handles:
 
 - ZIP-code validation
-- ZIP-to-location conversion
-- National Weather Service forecast retrieval
+- ZIP-to-coordinate lookup
+- NWS weather retrieval
 - PostgreSQL caching
 - lookup history
 - database connectivity
@@ -348,37 +354,29 @@ The Weather service handles:
 
 # 9. Zippopotam API
 
-The Weather service first converts the ZIP code into geographic coordinates.
+The Weather service first converts a ZIP code into geographic coordinates.
 
 Example:
 
-```bash
+~~~bash
 curl -s https://api.zippopotam.us/us/60616
-```
+~~~
 
-ZIP code:
+ZIP code `60616` returns Chicago location information including latitude and longitude.
 
-```text
-60616
-```
-
-returns Chicago location information including latitude and longitude.
-
-The coordinates are then used with the National Weather Service API.
+These coordinates are then used with the National Weather Service API.
 
 ---
 
 # 10. National Weather Service API
 
-The Weather service calls:
+The Weather service uses:
 
-```text
+~~~text
 https://api.weather.gov/points/{latitude},{longitude}
-```
+~~~
 
-The points endpoint returns the forecast endpoint.
-
-The forecast contains information including:
+The API provides a forecast endpoint containing information such as:
 
 - temperature
 - temperature unit
@@ -387,9 +385,17 @@ The forecast contains information including:
 - precipitation chance
 - daytime/nighttime status
 
-A descriptive User-Agent containing contact information is sent with the request.
+A descriptive User-Agent is supplied with the NWS request.
 
 ## Screenshot 02 — NWS Weather API
+
+Command used:
+
+~~~bash
+curl -s -H "User-Agent: $UA" "$FORECAST_URL" | python3 -m json.tool | head -40
+~~~
+
+The returned JSON proves that the external NWS forecast API was reachable and successfully returned weather data.
 
 ![NWS Weather API](screenshots/02_nws_weather_api.png)
 
@@ -397,21 +403,21 @@ A descriptive User-Agent containing contact information is sent with the request
 
 # 11. Weather Endpoint
 
-Main Weather endpoint:
+Main endpoint:
 
-```text
+~~~text
 GET /weather?zip=60616
-```
+~~~
 
 Example:
 
-```bash
-curl -i "http://ALB_DNS:8080/weather?zip=60616"
-```
+~~~bash
+curl -i "http://$ALB_DNS_NAME:8080/weather?zip=60616"
+~~~
 
 Example response:
 
-```json
+~~~json
 {
   "zip": "60616",
   "city": "Chicago",
@@ -423,30 +429,30 @@ Example response:
   },
   "cache": "miss"
 }
-```
+~~~
 
 A repeated request can return:
 
-```json
+~~~json
 {
   "cache": "hit"
 }
-```
+~~~
 
 ---
 
 # 12. PostgreSQL RDS Database
 
-The Weather Tier uses PostgreSQL on Amazon RDS.
+The Weather tier uses PostgreSQL on Amazon RDS.
 
-The database stores:
+It stores:
 
-- weather cache
+- weather cache data
 - lookup history
 
-Required configuration:
+Required database settings:
 
-```text
+~~~text
 Engine: PostgreSQL
 Instance Class: db.t4g.micro
 Storage: 20 GB
@@ -456,33 +462,42 @@ Publicly Accessible: No
 Multi-AZ: No
 Backup Retention: 0
 Automated Backups: Disabled
-```
-
-The database is created using:
-
-```bash
-python3 create_database.py
-```
+~~~
 
 ---
 
 # 13. Database Creation
 
-The Python script performs:
+Command:
 
-```text
-1. Find default VPC
-2. Find subnets in both Availability Zones
-3. Create DB Security Group
-4. Create DB Subnet Group
-5. Generate random database password
-6. Store password as an SSM SecureString
-7. Create PostgreSQL RDS instance
-8. Wait for database availability
-9. Save the database endpoint
-```
+~~~bash
+python3 create_database.py
+~~~
+
+The script:
+
+~~~text
+1. Finds the default VPC
+2. Finds required subnets
+3. Creates the DB Security Group
+4. Creates the DB Subnet Group
+5. Generates a random database password
+6. Stores the password in SSM
+7. Creates the PostgreSQL RDS instance
+8. Waits for the database
+9. Saves the endpoint
+~~~
 
 ## Screenshot 04 — Database Created
+
+The screenshot shows successful RDS creation and confirms that the database is:
+
+~~~text
+Private
+Encrypted
+Single-AZ
+Automated backups OFF
+~~~
 
 ![Database Created](screenshots/04_database_created.png)
 
@@ -490,27 +505,27 @@ The Python script performs:
 
 # 14. Database Verification
 
-The deployed database was verified with the following settings:
+Verification command:
 
-```text
+~~~bash
+aws rds describe-db-instances \
+  --db-instance-identifier "$DB_INSTANCE_ID" \
+  --query "DBInstances[0].{Class:DBInstanceClass,Engine:Engine,MultiAZ:MultiAZ,Public:PubliclyAccessible,Encrypted:StorageEncrypted,BackupRetentionDays:BackupRetentionPeriod}" \
+  --output table
+~~~
+
+Expected configuration:
+
+~~~text
 DBInstanceClass: db.t4g.micro
 BackupRetentionPeriod: 0
 MultiAZ: False
 PubliclyAccessible: False
 StorageEncrypted: True
-```
+Engine: postgres
+~~~
 
-Database snapshots:
-
-```text
-[]
-```
-
-Automated backups:
-
-```text
-[]
-```
+Database snapshots and automated backups were also checked and returned empty results.
 
 ## Screenshot 05 — Database Verification
 
@@ -518,175 +533,166 @@ Automated backups:
 
 ---
 
-# 15. Database Security Group
+# 15. Database Security
 
 PostgreSQL uses:
 
-```text
+~~~text
 TCP 5432
-```
+~~~
 
-The Database Security Group permits port `5432` only from the application Security Group.
+The DB Security Group permits port `5432` only from the application Security Group.
 
-It does not allow:
+It does not permit:
 
-```text
+~~~text
 0.0.0.0/0
-```
+~~~
 
-and does not allow a public IPv6 range.
-
-Therefore PostgreSQL is not directly accessible from the internet.
+Therefore the database is not directly exposed to the internet.
 
 ---
 
 # 16. Database Password Security
 
-The database password is generated using:
+The password is generated using:
 
-```python
+~~~python
 secrets.token_hex(16)
-```
+~~~
 
-It is stored in AWS Systems Manager Parameter Store as:
+It is stored in SSM Parameter Store as:
 
-```text
+~~~text
 SecureString
-```
+~~~
 
-Parameter name:
+Parameter:
 
-```text
+~~~text
 /itmo-444-544/db-password
-```
+~~~
 
-The database password is not stored in:
+The password is not stored in:
 
-- GitHub
-- `.env`
-- Node.js source code
-- Python source code
-- screenshots
-- logs
-- EC2 user-data
+~~~text
+GitHub
+.env
+Node.js source code
+Python source code
+screenshots
+EC2 user-data
+~~~
 
-Only the Weather IAM role can read the password.
+Only the Weather IAM role can retrieve this parameter.
 
 ---
 
 # 17. PostgreSQL Cache
 
-Configured cache time:
+Cache duration:
 
-```text
+~~~text
 CACHE_SECONDS=600
-```
+~~~
 
-This equals approximately:
-
-```text
-10 minutes
-```
+which equals approximately 10 minutes.
 
 First lookup:
 
-```json
+~~~json
 {
   "cache": "miss"
 }
-```
+~~~
 
 Repeated lookup:
 
-```json
+~~~json
 {
   "cache": "hit"
 }
-```
+~~~
 
-Caching reduces external API calls and improves response time.
+This reduces unnecessary external API requests.
 
 ---
 
 # 18. Lookup History
 
-The Weather service stores completed lookups in PostgreSQL.
+The Weather service stores completed requests in PostgreSQL.
 
 Endpoint:
 
-```text
+~~~text
 GET /history
-```
+~~~
 
 Example:
 
-```bash
-curl "http://ALB_DNS:8080/history"
-```
+~~~bash
+curl "http://$ALB_DNS_NAME:8080/history"
+~~~
 
-The response includes previously requested ZIP codes and forecast information.
-
-This verifies PostgreSQL read and write operations.
+This proves database read/write functionality.
 
 ---
 
-# 19. Weather Error Handling
+# 19. Error Handling
 
 Invalid ZIP:
 
-```text
+~~~text
 123
-```
+~~~
 
 returns:
 
-```text
+~~~text
 HTTP 400 Bad Request
-```
+~~~
 
-Unknown ZIP:
+An unknown ZIP such as:
 
-```text
+~~~text
 00000
-```
+~~~
 
 returns:
 
-```text
+~~~text
 HTTP 404 Not Found
-```
+~~~
 
-Response:
+with:
 
-```json
+~~~json
 {
   "error": "zip_not_found"
 }
-```
+~~~
 
 ---
 
 # 20. Advisor Service
 
-The Advisor service is also written using Node.js and Express.
+Advisor endpoint:
 
-Endpoint:
-
-```text
+~~~text
 GET /advice?zip=60616
-```
+~~~
 
-The Advisor performs:
+Flow:
 
-```text
+~~~text
 1. Call Weather through ALB port 8080
-2. Receive forecast information
+2. Receive weather data
 3. Retrieve Gemini API key from SSM
-4. Send weather information to Gemini
+4. Send forecast information to Gemini
 5. Return clothing advice
-```
+~~~
 
-The Advisor does not connect directly to PostgreSQL.
+The Advisor does not directly connect to PostgreSQL.
 
 ---
 
@@ -694,36 +700,53 @@ The Advisor does not connect directly to PostgreSQL.
 
 Configured model:
 
-```text
+~~~text
 gemini-3.1-flash-lite
-```
+~~~
 
 A successful response contains:
 
-```json
+~~~json
 {
   "source": "gemini",
   "model": "gemini-3.1-flash-lite"
 }
-```
-
-The application sends weather information needed to generate clothing advice.
+~~~
 
 ---
 
-# 22. Gemini API Key Security
+# 22. Gemini API-Key Security
 
-The Gemini key is stored in AWS Systems Manager as a SecureString.
+The Gemini API key is stored in AWS Systems Manager Parameter Store as:
+
+~~~text
+SecureString
+~~~
 
 Parameter:
 
-```text
+~~~text
 /itmo-444-544/gemini-api-key
-```
-
-The actual key is not committed to GitHub.
+~~~
 
 ## Screenshot 03 — Gemini SecureString
+
+Command:
+
+~~~bash
+aws ssm describe-parameters \
+  --parameter-filters "Key=Name,Values=$GEMINI_PARAM_NAME" \
+  --query "Parameters[].{Name:Name,Type:Type,Tier:Tier}" \
+  --output table
+~~~
+
+The screenshot verifies:
+
+~~~text
+Name: /itmo-444-544/gemini-api-key
+Type: SecureString
+Tier: Standard
+~~~
 
 ![Gemini SSM SecureString](screenshots/03_gemini_ssm_securestring.png)
 
@@ -731,56 +754,74 @@ The actual key is not committed to GitHub.
 
 # 23. Gemini Fallback
 
-If Gemini fails, the Advisor provides rule-based clothing advice instead.
+If Gemini becomes unavailable, the Advisor can return rule-based clothing advice.
 
 Fallback response:
 
-```json
+~~~json
 {
   "source": "fallback",
   "model": null
 }
-```
+~~~
 
-This prevents the complete Advisor application from failing when the AI service is unavailable.
+This prevents an AI-service problem from completely breaking the Advisor application.
 
 ---
 
 # 24. IAM Least Privilege
 
-The Weather and Advisor tiers use separate roles.
+The Weather and Advisor tiers use separate IAM roles.
 
 ## Weather Role
 
 Allowed:
 
-```text
+~~~text
 ssm:GetParameter
-```
+~~~
 
 only for:
 
-```text
+~~~text
 /itmo-444-544/db-password
-```
+~~~
 
 ## Advisor Role
 
 Allowed:
 
-```text
+~~~text
 ssm:GetParameter
-```
+~~~
 
 only for:
 
-```text
+~~~text
 /itmo-444-544/gemini-api-key
-```
+~~~
 
-Neither role can read the other tier's secret.
+Neither application can retrieve the other application's secret.
 
 ## Screenshot 08 — IAM Least Privilege
+
+Commands:
+
+~~~bash
+aws iam get-role-policy \
+  --role-name "$WEATHER_ROLE_NAME" \
+  --policy-name "${WEATHER_ROLE_NAME}-policy" \
+  --query 'PolicyDocument.Statement'
+~~~
+
+~~~bash
+aws iam get-role-policy \
+  --role-name "$ADVISOR_ROLE_NAME" \
+  --policy-name "${ADVISOR_ROLE_NAME}-policy" \
+  --query 'PolicyDocument.Statement'
+~~~
+
+The output proves that each IAM role has access only to its required SSM parameter.
 
 ![IAM Least Privilege](screenshots/08_iam_least_privilege.png)
 
@@ -788,16 +829,16 @@ Neither role can read the other tier's secret.
 
 # 25. Application Load Balancer
 
-The Application Load Balancer has two listeners:
+The ALB has two listeners:
 
-```text
+~~~text
 8080 -> Weather Target Group
 8081 -> Advisor Target Group
-```
+~~~
 
-The ALB spans two Availability Zones.
+It spans two Availability Zones.
 
-The ALB is created before the launch templates because the Advisor user-data requires its DNS name.
+The ALB is created before the Advisor Launch Template because Advisor user-data needs the ALB DNS name.
 
 ---
 
@@ -807,32 +848,30 @@ The ALB is created before the launch templates because the Advisor user-data req
 
 Allows public traffic on:
 
-```text
+~~~text
 8080
 8081
-```
+~~~
 
 ## Application Security Group
 
 Application port:
 
-```text
+~~~text
 3000
-```
+~~~
 
-is allowed only from the ALB Security Group.
-
-Direct access to the application instances on port `3000` timed out during testing.
+is accessible only from the ALB Security Group.
 
 ## Database Security Group
 
 PostgreSQL port:
 
-```text
+~~~text
 5432
-```
+~~~
 
-is allowed only from the application Security Group.
+is accessible only from the application Security Group.
 
 ---
 
@@ -840,41 +879,41 @@ is allowed only from the application Security Group.
 
 The Weather Launch Template receives:
 
-```text
+~~~text
 DB_HOST
 DB_NAME
 DB_USER
 DB_PASSWORD_PARAM
 CACHE_SECONDS
 NWS_USER_AGENT
-```
+~~~
 
 The Advisor Launch Template receives:
 
-```text
+~~~text
 WEATHER_URL
 GEMINI_KEY_PARAM
 GEMINI_MODEL
 KEY_CACHE_SECONDS
-```
+~~~
 
-Actual secret values are not placed inside user-data.
+Actual passwords and API keys are not inserted into EC2 user-data.
 
 ---
 
 # 28. User-Data Size
 
-AWS EC2 user-data must remain below 16 KB.
+AWS user-data must remain below 16 KB.
 
 Measured sizes:
 
-```text
+~~~text
 Weather user-data: 13192 bytes
 Advisor user-data: 11332 bytes
 Maximum allowed: 16384 bytes
-```
+~~~
 
-Both are below the required limit.
+Both are within the AWS limit.
 
 ---
 
@@ -882,58 +921,59 @@ Both are below the required limit.
 
 Two Auto Scaling Groups are used:
 
-```text
+~~~text
 itmo-444-544-weather-asg
 itmo-444-544-advisor-asg
-```
+~~~
 
 Configuration:
 
-```text
+~~~text
 Minimum Capacity: 1
 Maximum Capacity: 1
 Desired Capacity: 1
 Health Check Type: ELB
-```
+~~~
 
-Each ASG spans two subnets.
-
-If an instance fails, Auto Scaling creates a replacement instance.
+If an instance fails, its Auto Scaling Group creates a replacement.
 
 ---
 
 # 30. Stack Creation
 
-The application stack is created using:
+Command:
 
-```bash
+~~~bash
 python3 create_weather_stack.py
-```
+~~~
 
-Creation order:
+The script creates:
 
-```text
-1. Determine AWS account ID
-2. Find default VPC
-3. Find subnets
-4. Get RDS endpoint
-5. Create Weather role/profile
-6. Create Advisor role/profile
-7. Wait for IAM propagation
-8. Create ALB Security Group
-9. Restrict application Security Group
-10. Create Target Groups
-11. Create Application Load Balancer
-12. Wait for ALB availability
-13. Create listeners
-14. Create Weather Launch Template
-15. Create Advisor Launch Template
-16. Create Weather Auto Scaling Group
-17. Create Advisor Auto Scaling Group
-18. Save outputs
-```
+~~~text
+IAM roles and instance profiles
+ALB Security Group
+Target Groups
+Application Load Balancer
+Listeners
+Launch Templates
+Auto Scaling Groups
+~~~
 
 ## Screenshot 06 — Weather Stack Created
+
+The screenshot shows successful creation of:
+
+- ALB Security Group
+- Weather Target Group
+- Advisor Target Group
+- Application Load Balancer
+- listeners on 8080 and 8081
+- Weather Launch Template
+- Advisor Launch Template
+- Weather Auto Scaling Group
+- Advisor Auto Scaling Group
+
+It also displays the final Weather and Advisor URLs.
 
 ![Weather Stack Created](screenshots/06_weather_stack_created.png)
 
@@ -941,7 +981,37 @@ Creation order:
 
 # 31. Advisor Gemini Success
 
-A live Advisor request successfully returned Gemini-generated clothing advice.
+Command:
+
+~~~bash
+curl -s "http://$ALB_DNS_NAME:8081/advice?zip=60616" | python3 -m json.tool
+~~~
+
+The response contains:
+
+~~~text
+zip
+city
+state
+forecast
+latitude
+longitude
+cache
+advice
+source
+model
+~~~
+
+The important fields are:
+
+~~~json
+{
+  "source": "gemini",
+  "model": "gemini-3.1-flash-lite"
+}
+~~~
+
+This proves that the Advisor service successfully contacted the Weather service and generated an AI clothing recommendation through Gemini.
 
 ## Screenshot 07 — Advisor Gemini Success
 
@@ -951,21 +1021,18 @@ A live Advisor request successfully returned Gemini-generated clothing advice.
 
 # 32. Idempotency
 
-Infrastructure functions are designed to be idempotent.
+Infrastructure creation functions are designed to be safely rerun.
 
-Running creation code more than once does not create duplicate resources.
-
-Examples include:
+Examples:
 
 - existing Security Groups are reused
 - existing DB Subnet Groups are reused
 - existing password parameters are reused
-- an existing RDS database is reused
-- IAM roles can already exist
-- create functions can be rerun safely
+- existing RDS resources are reused when appropriate
+- IAM roles may already exist
 - delete functions tolerate already-missing resources
 
-Database idempotency is also verified using moto tests.
+Idempotency is also tested using moto.
 
 ---
 
@@ -973,43 +1040,41 @@ Database idempotency is also verified using moto tests.
 
 Unit tests use:
 
-```text
+~~~text
 pytest
 moto
-```
-
-They do not use the real AWS account.
-
-Final result:
-
-```text
-27 passed
-20 deselected
-```
+~~~
 
 Command:
 
-```bash
+~~~bash
 pytest -q
-```
+~~~
+
+Final result:
+
+~~~text
+27 passed
+20 deselected
+~~~
+
+The tests run without creating real AWS resources.
 
 ---
 
 # 34. Database Moto Tests
 
-A dedicated file was added:
+File:
 
-```text
+~~~text
 tests/unit/test_database_with_moto.py
-```
+~~~
 
-It contains four required database tests.
+The tests verify:
 
-## Test 1 — RDS Configuration
+## RDS Configuration
 
-Verifies:
-
-```text
+~~~text
 DBInstanceClass = db.t4g.micro
 Engine = PostgreSQL
 AllocatedStorage = 20
@@ -1017,88 +1082,93 @@ BackupRetentionPeriod = 0
 MultiAZ = False
 PubliclyAccessible = False
 StorageEncrypted = True
-```
+~~~
 
-## Test 2 — DB Security Group
+## Database Security Group
 
-Verifies:
-
-```text
+~~~text
 Protocol = TCP
 Port = 5432
 Source = Application Security Group
-No IPv4 CIDR
-No IPv6 CIDR
-```
+No public IPv4 CIDR
+No public IPv6 CIDR
+~~~
 
-## Test 3 — Idempotency
+## Idempotency
 
-Runs database creation functions twice and verifies there are no duplicate:
+Database creation functions are run twice to verify that duplicate resources are not created.
 
-- DB Security Groups
-- DB Subnet Groups
-- password parameters
-- RDS databases
+## Create/Delete Cleanup
 
-## Test 4 — Create/Delete Cleanup
+The test confirms that:
 
-Creates the database resources and then deletes them.
+~~~text
+RDS instance is deleted
+snapshots remain empty
+password parameter is deleted
+~~~
 
-Verifies:
+Database-specific result:
 
-- database instance is removed
-- snapshots are empty
-- password parameter is removed
-
-Result:
-
-```text
+~~~text
 4 passed
-```
+~~~
 
 ---
 
 # 35. Integration Tests
 
-Integration tests run against the real AWS stack.
-
 Command:
 
-```bash
+~~~bash
 pytest -q -m integration
-```
+~~~
 
 Final result:
 
-```text
+~~~text
 18 passed
 29 deselected
-```
+~~~
 
-Integration testing verified:
+Integration tests verified:
 
-- ALB active
-- two Availability Zones
+- ALB is active
+- ALB spans two Availability Zones
 - listener 8080 routes to Weather
 - listener 8081 routes to Advisor
-- Weather Target Group healthy
-- Advisor Target Group healthy
-- both Auto Scaling Groups configured
-- application port 3000 restricted to ALB
-- PostgreSQL 5432 restricted to application SG
-- RDS private
-- RDS encrypted
-- Multi-AZ disabled
-- automated backups disabled
-- Weather endpoint working
-- cache miss/hit behavior
-- lookup history
+- Weather Target Group is healthy
+- Advisor Target Group is healthy
+- Auto Scaling Groups are configured
+- application port 3000 is restricted
+- PostgreSQL 5432 is restricted
+- RDS is private
+- RDS is encrypted
+- Multi-AZ is disabled
+- automated backups are disabled
+- Weather endpoint works
+- cache miss/hit works
+- lookup history works
 - invalid ZIP returns 400
 - unknown ZIP returns 404
 - Advisor returns advice
-- IAM least privilege
+- IAM least privilege is enforced
 
 ## Screenshot 13 — Unit and Integration Tests
+
+Commands:
+
+~~~bash
+pytest -q
+pytest -q -m integration
+~~~
+
+Result:
+
+~~~text
+27 passed, 20 deselected
+18 passed, 29 deselected
+~~~
 
 ![Unit and Integration Tests Passed](screenshots/13_unit_and_integration_tests_passed.png)
 
@@ -1110,86 +1180,160 @@ Two failure scenarios were tested.
 
 ## Chaos Test 1 — Database Failure
 
-The PostgreSQL Security Group rule was temporarily removed.
+Database connectivity was intentionally interrupted.
 
-The Weather service could no longer connect to PostgreSQL.
+Even without PostgreSQL, the Weather service continued returning:
 
-The service still returned:
-
-```text
+~~~text
 HTTP 200
-```
+~~~
 
 with:
 
-```json
+~~~json
 {
   "cache": "unavailable"
 }
-```
+~~~
 
-This proves graceful degradation.
+This demonstrates graceful degradation.
 
-The DB Security Group rule was restored after the test.
+The database rule was restored after the test.
 
 ---
 
 ## Chaos Test 2 — Weather EC2 Failure
 
-A Weather instance was intentionally terminated.
+Before terminating the Weather EC2 instance, the Weather endpoint and Target Group were verified as healthy.
 
-Before failure, the target was healthy.
+### Screenshot 09 — Healthy Before Chaos
 
-## Screenshot 09 — Healthy Before Chaos
+Commands:
+
+~~~bash
+curl -i "http://$ALB_DNS_NAME:8080/weather?zip=60616"
+~~~
+
+and:
+
+~~~bash
+aws elbv2 describe-target-health \
+  --target-group-arn "$WEATHER_TG_ARN" \
+  --query 'TargetHealthDescriptions[*].{Instance:Target.Id,State:TargetHealth.State,Reason:TargetHealth.Reason}'
+~~~
+
+The screenshot shows:
+
+~~~text
+HTTP/1.1 200 OK
+State: healthy
+~~~
+
+This establishes a healthy baseline before introducing the failure.
 
 ![Weather Healthy Before Chaos](screenshots/09_weather_healthy_before_chaos.png)
 
-During the Weather outage, Advisor returned:
+---
 
-```text
+The Weather instance was then intentionally terminated.
+
+### Screenshot 10 — Advisor 502 During Weather Outage
+
+Command:
+
+~~~bash
+aws ec2 terminate-instances \
+  --instance-ids <WEATHER_INSTANCE_ID>
+~~~
+
+Immediately afterward:
+
+~~~bash
+curl -i "http://$ALB_DNS_NAME:8081/advice?zip=60616"
+~~~
+
+returned:
+
+~~~text
 HTTP/1.1 502 Bad Gateway
-```
+~~~
 
-Response:
-
-```json
-{
-  "error": "weather_service_unavailable"
-}
-```
-
-## Screenshot 10 — Advisor 502 During Weather Outage
+This confirms that the Advisor correctly reported the Weather service as unavailable while the Weather tier had no healthy target.
 
 ![Advisor Weather Outage](screenshots/10_advisor_weather_outage_502.png)
 
-The Weather Auto Scaling Group automatically launched a replacement.
+---
 
-Measured recovery:
+The Weather Auto Scaling Group automatically launched a replacement EC2 instance.
 
-```text
-approximately 112.5 seconds
-```
+### Screenshot 11 — Weather Recovered
 
-Required recovery:
+Commands:
 
-```text
-<= 300 seconds
-```
+~~~bash
+aws elbv2 describe-target-health \
+  --target-group-arn "$WEATHER_TG_ARN" \
+  --query 'TargetHealthDescriptions[*].{Instance:Target.Id,State:TargetHealth.State,Reason:TargetHealth.Reason,Description:TargetHealth.Description}'
+~~~
 
-The requirement passed.
+and:
 
-## Screenshot 11 — Weather Recovered
+~~~bash
+curl -i "http://$ALB_DNS_NAME:8080/weather?zip=60616"
+~~~
+
+The replacement target became:
+
+~~~text
+State: healthy
+~~~
+
+and Weather returned:
+
+~~~text
+HTTP/1.1 200 OK
+~~~
+
+This proves automatic EC2 recovery through Auto Scaling.
 
 ![Weather Recovered](screenshots/11_weather_recovered_after_outage.png)
 
-Automated chaos tests returned:
+---
 
-```text
-2 passed
-41 deselected
-```
+Measured recovery time:
 
-## Screenshot 12 — Chaos Tests Passed
+~~~text
+approximately 112.5 seconds
+~~~
+
+Required recovery objective:
+
+~~~text
+<= 300 seconds
+~~~
+
+The requirement passed.
+
+### Screenshot 12 — Automated Chaos Tests
+
+Command:
+
+~~~bash
+pytest -q -m chaos -s
+~~~
+
+Output:
+
+~~~text
+DB outage response: 200
+Terminated Weather instance
+Saw Advisor 502: True
+Weather recovery time: approximately 112.5 seconds
+
+2 passed, 41 deselected
+~~~
+
+This automated both failure scenarios and confirmed recovery.
 
 ![Chaos Tests Passed](screenshots/12_chaos_tests_passed.png)
 
@@ -1197,7 +1341,7 @@ Automated chaos tests returned:
 
 # 37. Moto Limitations
 
-Moto was useful for testing AWS resource creation and configuration without using real AWS resources.
+Moto was useful for testing infrastructure logic without creating real AWS resources.
 
 Moto successfully tested:
 
@@ -1208,7 +1352,7 @@ Moto successfully tested:
 - SSM parameters
 - database creation/deletion
 - idempotency
-- user-data content
+- user-data contents
 - user-data size
 
 Moto cannot fully prove:
@@ -1219,54 +1363,43 @@ Moto cannot fully prove:
 - IAM propagation delays
 - Auto Scaling replacement time
 - real RDS connectivity
-- TLS networking
 - external API behavior
-- real internet routing
+- internet routing
 
-Therefore integration and chaos tests were also run against the real AWS stack.
+For those reasons, integration and chaos tests were also executed against real AWS infrastructure.
 
 ---
 
 # 38. Python vs Bash
 
-Bash is useful for short AWS CLI commands, but Python was better for this project because there are many dependent cloud resources.
+Bash is useful for short AWS CLI operations, but Python is better suited to this assignment because the infrastructure contains many dependent resources.
 
-Python made it easier to:
+Python makes it easier to:
 
 - divide infrastructure into modules
 - validate configuration
-- handle specific AWS errors
+- handle AWS exceptions
 - implement idempotency
-- test infrastructure using moto
-- reuse creation and deletion logic
-- control creation order
-- create integration and chaos tests
+- test with moto
+- reuse creation/deletion logic
+- control resource creation order
+- write integration and chaos tests
 
-Bash can commonly use:
-
-```bash
-2>/dev/null || true
-```
-
-but this can hide unexpected errors.
-
-Python can inspect specific AWS error codes and ignore only expected errors while allowing unexpected failures to be reported.
-
-Although Python requires more code, it provides better structure and testability for infrastructure automation.
+Python requires more code, but provides better organization, testing, and error handling for infrastructure automation.
 
 ---
 
 # 39. Stack Deletion
 
-The application stack is deleted using:
+Command:
 
-```bash
+~~~bash
 python3 delete_weather_stack.py
-```
+~~~
 
 It removes:
 
-```text
+~~~text
 Weather Auto Scaling Group
 Advisor Auto Scaling Group
 Application Load Balancer
@@ -1279,29 +1412,27 @@ Weather IAM Role/Profile
 Advisor IAM Role/Profile
 Gemini SSM parameter
 Stack output files
-```
+~~~
 
-The Gemini parameter removed by Python is:
+Gemini parameter:
 
-```text
+~~~text
 /itmo-444-544/gemini-api-key
-```
-
-The deletion code also tolerates the parameter already being absent.
+~~~
 
 ---
 
 # 40. Database Deletion
 
-The database is deleted separately using:
+Command:
 
-```bash
+~~~bash
 python3 delete_database.py
-```
+~~~
 
 The script removes:
 
-- RDS database
+- RDS instance
 - DB Subnet Group
 - DB Security Group
 - database password parameter
@@ -1310,107 +1441,107 @@ The script removes:
 
 Database deletion uses:
 
-```text
+~~~text
 SkipFinalSnapshot=True
 DeleteAutomatedBackups=True
-```
+~~~
 
-No final snapshot is retained.
+The password parameter:
 
-Database password parameter:
-
-```text
+~~~text
 /itmo-444-544/db-password
-```
+~~~
 
-is also removed.
+is also deleted.
 
 ---
 
 # 41. Final Cleanup Verification
 
-After all testing was complete, both Python deletion scripts were executed.
+After testing, both deletion scripts were executed.
 
-The following resources were checked:
+The following resource types were checked:
 
-```text
+~~~text
 Auto Scaling Groups
 Application Load Balancers
 RDS instances
 RDS snapshots
 RDS automated backups
+SSM parameters
 DB Subnet Groups
 Launch Templates
 IAM roles
 Target Groups
-SSM parameters
-```
+~~~
 
 Verification commands included:
 
-```bash
+~~~bash
 aws autoscaling describe-auto-scaling-groups \
   --query "AutoScalingGroups[?contains(AutoScalingGroupName, 'itmo-444-544')].[AutoScalingGroupName]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws elbv2 describe-load-balancers \
   --query "LoadBalancers[?contains(LoadBalancerName, 'itmo-444-544')].[LoadBalancerName]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws rds describe-db-instances \
   --query "DBInstances[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBInstanceIdentifier]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws rds describe-db-snapshots \
   --query "DBSnapshots[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBSnapshotIdentifier]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws rds describe-db-instance-automated-backups \
   --query "DBInstanceAutomatedBackups[?contains(DBInstanceIdentifier, 'itmo-444-544')].[DBInstanceIdentifier]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws ssm describe-parameters \
   --query "Parameters[?contains(Name, 'itmo-444-544')].[Name]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws rds describe-db-subnet-groups \
   --query "DBSubnetGroups[?contains(DBSubnetGroupName, 'itmo-444-544')].[DBSubnetGroupName]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws ec2 describe-launch-templates \
   --query "LaunchTemplates[?contains(LaunchTemplateName, 'itmo-444-544')].[LaunchTemplateName]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws iam list-roles \
   --query "Roles[?contains(RoleName, 'itmo-444-544')].[RoleName]" \
   --output table
-```
+~~~
 
-```bash
+~~~bash
 aws elbv2 describe-target-groups \
   --query "TargetGroups[?contains(TargetGroupName, 'itmo-444-544')].[TargetGroupName]" \
   --output table
-```
+~~~
 
-All final verification checks returned no matching Step08 resources.
+All checks returned no matching Step08 resources.
 
 ## Screenshot 14 — Final Cleanup Verification
+
+The screenshot shows the final AWS CLI cleanup queries returning no matching resources.
 
 ![Final Cleanup Verified](screenshots/14_final_cleanup_verified.png)
 
@@ -1418,28 +1549,28 @@ All final verification checks returned no matching Step08 resources.
 
 # 42. Screenshot Evidence
 
-| No. | Screenshot | Evidence |
+| No. | Screenshot | What It Proves |
 |---|---|---|
-| 01 | `01_project_structure.png` | Final project structure |
-| 02 | `02_nws_weather_api.png` | National Weather Service API |
-| 03 | `03_gemini_ssm_securestring.png` | Gemini key stored as SSM SecureString |
-| 04 | `04_database_created.png` | PostgreSQL database creation |
-| 05 | `05_database_verified.png` | RDS settings verification |
-| 06 | `06_weather_stack_created.png` | Python Weather Advisor stack creation |
-| 07 | `07_advisor_gemini_success.png` | Successful Gemini Advisor response |
-| 08 | `08_iam_least_privilege.png` | Least-privilege IAM policies |
-| 09 | `09_weather_healthy_before_chaos.png` | Healthy Weather target before chaos |
-| 10 | `10_advisor_weather_outage_502.png` | Advisor 502 during Weather outage |
-| 11 | `11_weather_recovered_after_outage.png` | Weather Auto Scaling recovery |
-| 12 | `12_chaos_tests_passed.png` | Automated chaos tests |
-| 13 | `13_unit_and_integration_tests_passed.png` | 27 unit/moto + 18 integration tests |
-| 14 | `14_final_cleanup_verified.png` | Final AWS cleanup verification |
+| 01 | `01_project_structure.png` | Final Weather Advisor project structure |
+| 02 | `02_nws_weather_api.png` | NWS API successfully returns forecast data |
+| 03 | `03_gemini_ssm_securestring.png` | Gemini API key stored as an SSM SecureString |
+| 04 | `04_database_created.png` | PostgreSQL RDS database successfully created |
+| 05 | `05_database_verified.png` | Required RDS configuration and disabled backups |
+| 06 | `06_weather_stack_created.png` | ALB, target groups, listeners, launch templates and ASGs created |
+| 07 | `07_advisor_gemini_success.png` | Advisor successfully generated Gemini clothing advice |
+| 08 | `08_iam_least_privilege.png` | Weather and Advisor roles only access their required SSM parameters |
+| 09 | `09_weather_healthy_before_chaos.png` | Weather endpoint and target healthy before EC2 failure |
+| 10 | `10_advisor_weather_outage_502.png` | Weather EC2 terminated and Advisor returned 502 |
+| 11 | `11_weather_recovered_after_outage.png` | Replacement Weather instance became healthy and returned HTTP 200 |
+| 12 | `12_chaos_tests_passed.png` | Automated DB and Weather failure tests passed |
+| 13 | `13_unit_and_integration_tests_passed.png` | 27 unit/moto and 18 integration tests passed |
+| 14 | `14_final_cleanup_verified.png` | Final AWS cleanup verified |
 
 ---
 
 # 43. Final Test Results
 
-```text
+~~~text
 Database-specific Moto:
 4 passed
 
@@ -1460,7 +1591,7 @@ approximately 112.5 seconds
 
 Required Recovery:
 <= 300 seconds
-```
+~~~
 
 All automated tests passed.
 
@@ -1474,65 +1605,65 @@ All automated tests passed.
 - [x] `delete_database.py`
 - [x] `create_weather_stack.py`
 - [x] `delete_weather_stack.py`
-- [x] Infrastructure implemented with boto3
-- [x] Required PostgreSQL database configuration
-- [x] Database password generated with `secrets.token_hex(16)`
+- [x] Infrastructure implemented using boto3
+- [x] Required PostgreSQL RDS configuration
+- [x] Password generated using `secrets.token_hex(16)`
 - [x] Database password stored in SSM
 - [x] Gemini key stored in SSM
 - [x] Weather role reads only DB secret
 - [x] Advisor role reads only Gemini secret
-- [x] ALB and both listeners
+- [x] ALB and two listeners
 - [x] Weather and Advisor Target Groups
 - [x] Weather and Advisor Launch Templates
 - [x] Weather and Advisor Auto Scaling Groups
 - [x] ALB created before Advisor Launch Template
 - [x] Advisor user-data receives ALB DNS
 - [x] Weather user-data receives DB host
-- [x] No password in user-data
-- [x] Both user-data scripts below 16 KB
-- [x] Idempotent creation
+- [x] Secrets excluded from user-data
+- [x] User-data below 16 KB
+- [x] Idempotent resource creation
 - [x] Safe repeated deletion
 - [x] No secrets committed to GitHub
 
 ## Unit / Moto Tests
 
 - [x] `db.t4g.micro`
-- [x] Backup retention 0
-- [x] Multi-AZ false
-- [x] Publicly accessible false
+- [x] Backup retention = 0
+- [x] Multi-AZ = false
+- [x] Publicly accessible = false
 - [x] Storage encrypted
-- [x] DB Security Group allows 5432 only from app SG
+- [x] DB Security Group restricts port 5432
 - [x] No public DB CIDR
 - [x] Database create/delete tested
-- [x] Snapshots empty after delete
+- [x] Snapshots empty after deletion
 - [x] Password parameter removed
 - [x] IAM least privilege tested
 - [x] Advisor user-data contains ALB DNS
 - [x] Weather user-data contains DB host
 - [x] Password absent from user-data
-- [x] User-data under 16 KB
+- [x] User-data below 16 KB
 - [x] Idempotency tested
 
 ## Integration Tests
 
-- [x] Both target groups healthy
-- [x] Weather endpoint successful
+- [x] Target Groups healthy
+- [x] Weather endpoint works
 - [x] Cache miss and hit verified
 - [x] `/history` verified
 - [x] Invalid ZIP returns 400
 - [x] Unknown ZIP returns 404
-- [x] Advisor returns advice
-- [x] Application instances accessible only through ALB
+- [x] Advisor returns clothing advice
+- [x] Instances protected behind ALB
 - [x] Database not publicly reachable
-- [x] RDS settings verified
+- [x] RDS configuration verified
 - [x] IAM least privilege verified
 
 ## Chaos Tests
 
-- [x] Database access intentionally removed
+- [x] Database access intentionally interrupted
 - [x] Weather remained available
 - [x] Cache reported unavailable
-- [x] DB rule restored
+- [x] Database access restored
 - [x] Weather EC2 intentionally terminated
 - [x] Advisor returned 502 during outage
 - [x] Auto Scaling launched replacement
@@ -1547,7 +1678,7 @@ All automated tests passed.
 - [x] IAM roles/profiles removed
 - [x] RDS instance removed
 - [x] DB Subnet Group removed
-- [x] DB snapshots empty
+- [x] RDS snapshots empty
 - [x] Automated backups empty
 - [x] DB password parameter removed
 - [x] Gemini API-key parameter removed
@@ -1557,11 +1688,11 @@ All automated tests passed.
 
 # 45. Final Result
 
-The Weather Advisor project successfully demonstrates a complete two-tier cloud application implemented and managed using Python.
+The Weather Advisor project successfully demonstrates a complete two-tier cloud application implemented and managed using Python and AWS.
 
-The project includes:
+The final solution includes:
 
-```text
+~~~text
 Python + boto3 infrastructure automation
 Two application tiers
 Application Load Balancer
@@ -1583,27 +1714,27 @@ Chaos testing
 Automatic EC2 recovery
 Idempotent infrastructure
 Python-based deletion
-Complete final AWS cleanup
-```
+Complete AWS cleanup
+~~~
 
-Final automated test results:
+Final automated results:
 
-```text
+~~~text
 27 unit/moto tests passed
 18 integration tests passed
 2 chaos tests passed
-```
+~~~
 
-Measured Weather recovery time:
+Measured Weather recovery:
 
-```text
+~~~text
 approximately 112.5 seconds
-```
+~~~
 
 Required recovery:
 
-```text
+~~~text
 <= 300 seconds
-```
+~~~
 
-The application functionality, AWS infrastructure, security, automated testing, failure recovery, and final resource cleanup were successfully completed.
+The application functionality, AWS infrastructure, security configuration, testing, failure recovery, and cleanup were successfully completed.
