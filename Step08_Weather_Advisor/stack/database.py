@@ -138,7 +138,7 @@ def ensure_database(
 
         aws.rds.create_db_instance(
             DBInstanceIdentifier=settings.db_instance_id,
-            DBInstanceClass="db.t4g.micro",
+            DBInstanceClass=settings.db_instance_class,
             Engine="postgres",
             AllocatedStorage=20,
             StorageType="gp2",

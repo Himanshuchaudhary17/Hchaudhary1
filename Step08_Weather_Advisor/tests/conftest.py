@@ -41,6 +41,7 @@ def env_values():
         "ALB_SG_NAME": "test-weather-alb-sg",
 
         "DB_INSTANCE_ID": "test-weather-db",
+        "DB_INSTANCE_CLASS": "db.t4g.micro",
         "DB_NAME": "weather",
         "DB_USER": "weatherapp",
         "DB_SG_NAME": "test-weather-db-sg",

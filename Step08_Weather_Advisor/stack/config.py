@@ -33,6 +33,7 @@ REQUIRED_KEYS = [
     "ALB_SG_NAME",
 
     "DB_INSTANCE_ID",
+    "DB_INSTANCE_CLASS",
     "DB_NAME",
     "DB_USER",
     "DB_SG_NAME",
@@ -58,11 +59,21 @@ def load_dotenv(path: str | Path = ".env") -> dict[str, str]:
     for raw in Path(path).read_text().splitlines():
         line = raw.strip()
 
-        if not line or line.startswith("#") or "=" not in line:
+        if (
+            not line
+            or line.startswith("#")
+            or "=" not in line
+        ):
             continue
 
         key, _, value = line.partition("=")
-        values[key.strip()] = value.strip().strip('"').strip("'")
+
+        values[key.strip()] = (
+            value
+            .strip()
+            .strip('"')
+            .strip("'")
+        )
 
     return values
 
@@ -103,6 +114,7 @@ class Settings:
     alb_sg_name: str
 
     db_instance_id: str
+    db_instance_class: str
     db_name: str
     db_user: str
     db_sg_name: str
@@ -123,7 +135,10 @@ class Settings:
 
     @property
     def tiers(self) -> tuple[Tier, Tier]:
-        return (self.weather, self.advisor)
+        return (
+            self.weather,
+            self.advisor,
+        )
 
     def tier(self, name: str) -> Tier:
         return {
@@ -138,11 +153,16 @@ class Settings:
         base_dir: str | Path = ".",
     ) -> "Settings":
 
-        missing = [k for k in REQUIRED_KEYS if not v.get(k)]
+        missing = [
+            key
+            for key in REQUIRED_KEYS
+            if not v.get(key)
+        ]
 
         if missing:
             raise ConfigError(
-                "Missing keys in .env: " + ", ".join(missing)
+                "Missing keys in .env: "
+                + ", ".join(missing)
             )
 
         base = Path(base_dir)
@@ -150,15 +170,30 @@ class Settings:
         def tier(prefix: str) -> Tier:
             return Tier(
                 name=prefix.lower(),
-                role_name=v[f"{prefix}_ROLE_NAME"],
-                profile_name=v[f"{prefix}_PROFILE_NAME"],
-                lt_name=v[f"{prefix}_LT_NAME"],
-                tg_name=v[f"{prefix}_TG_NAME"],
-                asg_name=v[f"{prefix}_ASG_NAME"],
+                role_name=v[
+                    f"{prefix}_ROLE_NAME"
+                ],
+                profile_name=v[
+                    f"{prefix}_PROFILE_NAME"
+                ],
+                lt_name=v[
+                    f"{prefix}_LT_NAME"
+                ],
+                tg_name=v[
+                    f"{prefix}_TG_NAME"
+                ],
+                asg_name=v[
+                    f"{prefix}_ASG_NAME"
+                ],
                 listener_port=int(
-                    v[f"{prefix}_LISTENER_PORT"]
+                    v[
+                        f"{prefix}_LISTENER_PORT"
+                    ]
                 ),
-                app_dir=base / f"{prefix.lower()}-app",
+                app_dir=(
+                    base
+                    / f"{prefix.lower()}-app"
+                ),
             )
 
         return cls(
@@ -166,25 +201,50 @@ class Settings:
             ami_id=v["AMI_ID"],
             key_name=v["KEY_NAME"],
             instance_type=v["INSTANCE_TYPE"],
-            app_sg_id=v["APP_SECURITY_GROUP_ID"],
+            app_sg_id=v[
+                "APP_SECURITY_GROUP_ID"
+            ],
             az_a=v["AZ_A"],
             az_b=v["AZ_B"],
 
             alb_name=v["ALB_NAME"],
-            alb_sg_name=v["ALB_SG_NAME"],
+            alb_sg_name=v[
+                "ALB_SG_NAME"
+            ],
 
-            db_instance_id=v["DB_INSTANCE_ID"],
+            db_instance_id=v[
+                "DB_INSTANCE_ID"
+            ],
+            db_instance_class=v[
+                "DB_INSTANCE_CLASS"
+            ],
             db_name=v["DB_NAME"],
             db_user=v["DB_USER"],
-            db_sg_name=v["DB_SG_NAME"],
-            db_subnet_group_name=v["DB_SUBNET_GROUP_NAME"],
-            db_password_param=v["DB_PASSWORD_PARAM"],
-            cache_seconds=int(v["CACHE_SECONDS"]),
+            db_sg_name=v[
+                "DB_SG_NAME"
+            ],
+            db_subnet_group_name=v[
+                "DB_SUBNET_GROUP_NAME"
+            ],
+            db_password_param=v[
+                "DB_PASSWORD_PARAM"
+            ],
+            cache_seconds=int(
+                v["CACHE_SECONDS"]
+            ),
 
-            gemini_param_name=v["GEMINI_PARAM_NAME"],
-            gemini_model=v["GEMINI_MODEL"],
-            key_cache_seconds=int(v["KEY_CACHE_SECONDS"]),
-            contact_email=v["CONTACT_EMAIL"],
+            gemini_param_name=v[
+                "GEMINI_PARAM_NAME"
+            ],
+            gemini_model=v[
+                "GEMINI_MODEL"
+            ],
+            key_cache_seconds=int(
+                v["KEY_CACHE_SECONDS"]
+            ),
+            contact_email=v[
+                "CONTACT_EMAIL"
+            ],
 
             weather=tier("WEATHER"),
             advisor=tier("ADVISOR"),
@@ -195,6 +255,7 @@ class Settings:
         cls,
         path: str | Path = ".env",
     ) -> "Settings":
+
         path = Path(path)
 
         return cls.from_values(
