@@ -23,6 +23,9 @@ def env_values():
         "AZ_A": "us-east-2a",
         "AZ_B": "us-east-2b",
 
+        "APP_PORT": "3000",
+        "DB_PORT": "5432",
+
         "WEATHER_ROLE_NAME": "weather-role",
         "WEATHER_PROFILE_NAME": "weather-profile",
         "WEATHER_LT_NAME": "weather-lt",

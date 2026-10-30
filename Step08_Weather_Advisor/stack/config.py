@@ -15,6 +15,9 @@ REQUIRED_KEYS = [
     "AZ_A",
     "AZ_B",
 
+    "APP_PORT",
+    "DB_PORT",
+
     "WEATHER_ROLE_NAME",
     "WEATHER_PROFILE_NAME",
     "WEATHER_LT_NAME",
@@ -54,6 +57,7 @@ class ConfigError(Exception):
 
 def load_dotenv(path: str | Path = ".env") -> dict[str, str]:
     """Read KEY=VALUE lines from a .env file."""
+
     values: dict[str, str] = {}
 
     for raw in Path(path).read_text().splitlines():
@@ -110,6 +114,9 @@ class Settings:
     az_a: str
     az_b: str
 
+    app_port: int
+    db_port: int
+
     alb_name: str
     alb_sg_name: str
 
@@ -129,9 +136,6 @@ class Settings:
 
     weather: Tier
     advisor: Tier
-
-    app_port: int = 3000
-    db_port: int = 5432
 
     @property
     def tiers(self) -> tuple[Tier, Tier]:
@@ -206,6 +210,13 @@ class Settings:
             ],
             az_a=v["AZ_A"],
             az_b=v["AZ_B"],
+
+            app_port=int(
+                v["APP_PORT"]
+            ),
+            db_port=int(
+                v["DB_PORT"]
+            ),
 
             alb_name=v["ALB_NAME"],
             alb_sg_name=v[
