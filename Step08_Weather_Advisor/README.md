@@ -1993,6 +1993,7 @@ The gaps are covered by live integration and chaos tests as follows:
 | Real application network isolation | `test_app_port_is_reachable_only_from_alb` and Screenshot 18 |
 | Real RDS configuration | `test_database_is_private_encrypted_single_az_no_backups` |
 | Real PostgreSQL network isolation | `test_database_port_not_reachable_from_client` |
+| Real PostgreSQL TLS behavior | The Weather application downloads the AWS RDS CA bundle and uses it for the live PostgreSQL connection; the successful live `/weather` and `/history` requests demonstrate that the application connected to the real RDS database using this SSL configuration. |
 | Real IAM policy evaluation | `test_iam_policy_simulator_enforces_least_privilege` |
 | Real Weather API behavior | `test_weather_valid_zip_returns_forecast` |
 | Real PostgreSQL cache behavior | `test_weather_second_lookup_can_use_cache` |
