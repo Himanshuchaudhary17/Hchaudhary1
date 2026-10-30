@@ -7,6 +7,8 @@ Run after the deployed stack is healthy:
 
 from __future__ import annotations
 
+import socket
+
 import pytest
 
 from tests.helpers import wait_until
@@ -48,9 +50,7 @@ def test_listeners_forward_to_correct_target_groups(
 
     forwards = {
         listener["Port"]:
-        listener["DefaultActions"][0][
-            "TargetGroupArn"
-        ]
+        listener["DefaultActions"][0]["TargetGroupArn"]
         for listener in listeners
     }
 
@@ -103,9 +103,7 @@ def test_asgs_use_elb_health_and_two_subnets(
 
         assert (
             set(
-                group[
-                    "VPCZoneIdentifier"
-                ].split(",")
+                group["VPCZoneIdentifier"].split(",")
             )
             == {
                 outputs.subnet_a,
@@ -131,10 +129,7 @@ def test_app_port_is_reachable_only_from_alb(
     rules = [
         permission
         for permission in group["IpPermissions"]
-        if (
-            permission.get("FromPort")
-            == settings.app_port
-        )
+        if permission.get("FromPort") == settings.app_port
     ]
 
     assert rules, "port 3000 rule missing"
@@ -144,8 +139,7 @@ def test_app_port_is_reachable_only_from_alb(
 
         source_groups = [
             pair["GroupId"]
-            for pair
-            in rule["UserIdGroupPairs"]
+            for pair in rule["UserIdGroupPairs"]
         ]
 
         assert source_groups == [
@@ -200,8 +194,7 @@ def test_database_is_private_encrypted_single_az_no_backups(
     settings,
 ):
     db = aws.rds.describe_db_instances(
-        DBInstanceIdentifier=
-            settings.db_instance_id
+        DBInstanceIdentifier=settings.db_instance_id
     )["DBInstances"][0]
 
     assert db["PubliclyAccessible"] is False
@@ -209,6 +202,38 @@ def test_database_is_private_encrypted_single_az_no_backups(
     assert db["StorageEncrypted"] is True
     assert db["BackupRetentionPeriod"] == 0
     assert db["DBInstanceClass"] == "db.t4g.micro"
+
+
+def test_database_port_not_reachable_from_client(
+    aws,
+    settings,
+):
+    """The private RDS PostgreSQL port must not be reachable externally."""
+
+    db = aws.rds.describe_db_instances(
+        DBInstanceIdentifier=settings.db_instance_id
+    )["DBInstances"][0]
+
+    host = db["Endpoint"]["Address"]
+    port = db["Endpoint"]["Port"]
+
+    assert port == settings.db_port
+    assert db["PubliclyAccessible"] is False
+
+    try:
+        connection = socket.create_connection(
+            (host, port),
+            timeout=5,
+        )
+    except (TimeoutError, OSError):
+        return
+
+    connection.close()
+
+    pytest.fail(
+        f"Database port {host}:{port} "
+        "was reachable from the client machine"
+    )
 
 
 def test_weather_role_reads_only_db_password(
@@ -290,20 +315,15 @@ def test_every_target_becomes_healthy(
                 aws.elbv2
                 .describe_target_health(
                     TargetGroupArn=
-                        outputs.tg_arn(
-                            tier.name
-                        )
-                )
-                ["TargetHealthDescriptions"]
+                        outputs.tg_arn(tier.name)
+                )["TargetHealthDescriptions"]
             )
 
             if not targets:
                 return False
 
             if any(
-                target[
-                    "TargetHealth"
-                ]["State"] != "healthy"
+                target["TargetHealth"]["State"] != "healthy"
                 for target in targets
             ):
                 return False
