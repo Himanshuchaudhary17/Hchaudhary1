@@ -208,7 +208,6 @@ Step08_Weather_Advisor/
 |   |-- 11_weather_recovered_after_outage.png
 |   |-- 12_chaos_tests_passed.png
 |   |-- 13_unit_and_integration_tests_passed.png
-|   |-- 14_final_cleanup_verified.png
 |   |-- 15_smoke_test_9_of_9.png
 |   |-- 16_weather_journal.png
 |   |-- 17_psql_history.png
@@ -220,7 +219,8 @@ Step08_Weather_Advisor/
 |   |-- 23_advisor_web_page.png
 |   |-- 24_cache_timing.png
 |   |-- 25_db_failure_log.png
-|   `-- 26_db_recovery.png
+|   |-- 26_db_recovery.png
+|   `-- 27_final_cleanup_verified.png
 |
 |-- create_database.py
 |-- delete_database.py
@@ -2048,9 +2048,9 @@ The expected final result is:
 
 This proves that no assignment RDS instance, RDS snapshot, automated backup, load balancer, or ITMO lab IAM role remains.
 
-## Screenshot 14 — Final Cleanup Verification
+## Screenshot 27 — Final Cleanup Verification
 
-![Final Cleanup Verified](screenshots/14_final_cleanup_verified.png)
+![Final Cleanup Verified](screenshots/27_final_cleanup_verified.png)
 
 ---
 
@@ -2071,7 +2071,6 @@ This proves that no assignment RDS instance, RDS snapshot, automated backup, loa
 | 11 | `11_weather_recovered_after_outage.png` | Replacement Weather instance became healthy |
 | 12 | `12_chaos_tests_passed.png` | Automated chaos tests passed |
 | 13 | `13_unit_and_integration_tests_passed.png` | Unit/moto and integration tests passed |
-| 14 | `14_final_cleanup_verified.png` | Final AWS cleanup verification |
 | 15 | `15_smoke_test_9_of_9.png` | Required application smoke test passed 9/9 |
 | 16 | `16_weather_journal.png` | Structured Weather logs and cache hit/miss timing |
 | 17 | `17_psql_history.png` | Lookup records stored directly in PostgreSQL |
@@ -2084,6 +2083,7 @@ This proves that no assignment RDS instance, RDS snapshot, automated backup, loa
 | 24 | `24_cache_timing.png` | Cache-hit request is much faster than initial request |
 | 25 | `25_db_failure_log.png` | DB outage causes `cache=unavailable`, `/history` 503, and `db_error` |
 | 26 | `26_db_recovery.png` | PostgreSQL recovered and cache returned `hit` |
+| 27 | `27_final_cleanup_verified.png` | Final AWS cleanup verification |
 
 ---
 
