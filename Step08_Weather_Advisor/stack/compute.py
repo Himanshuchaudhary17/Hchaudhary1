@@ -49,7 +49,7 @@ def build_user_data(
             )
 
         environment_lines = [
-            f'Environment="NWS_USER_AGENT=(itmo-444-544 weather lab, {settings.contact_email})"',
+            f'Environment="NWS_USER_AGENT=(Weather Advisor, {settings.contact_email})"',
             f"Environment=DB_HOST={db_host}",
             f"Environment=DB_NAME={settings.db_name}",
             f"Environment=DB_USER={settings.db_user}",

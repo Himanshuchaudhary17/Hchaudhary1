@@ -108,7 +108,7 @@ def restrict_app_security_group(
     settings: Settings,
     alb_sg_id: str
 ) -> None:
-    """Replace port 3000 open to world with port 3000 open to ALB only."""
+    """Replace direct app access with ALB-only access."""
     with ignore_errors("InvalidPermission.NotFound"):
         aws.ec2.revoke_security_group_ingress(
             GroupId=settings.app_sg_id,
