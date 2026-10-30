@@ -13,7 +13,9 @@ import time
 
 import pytest
 import requests
+from botocore.exceptions import ClientError
 
+from stack.util import error_code
 from tests.helpers import tier_url
 
 pytestmark = pytest.mark.chaos
@@ -163,10 +165,10 @@ def test_weather_survives_database_outage(
                 GroupId=db_sg_id,
                 IpPermissions=[permission],
             )
-        except Exception as exc:
+        except ClientError as err:
             if (
-                "InvalidPermission.Duplicate"
-                not in str(exc)
+                error_code(err)
+                != "InvalidPermission.Duplicate"
             ):
                 raise
 

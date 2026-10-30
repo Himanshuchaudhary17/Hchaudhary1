@@ -5,9 +5,11 @@ from __future__ import annotations
 import logging
 import time
 
+from botocore.exceptions import ClientError
+
 from .clients import AwsClients
 from .config import Settings, Tier
-from .util import ignore_errors, retry_on
+from .util import error_code, ignore_errors, retry_on
 
 
 log = logging.getLogger("stack")
@@ -34,7 +36,9 @@ def find_target_group(
         response = aws.elbv2.describe_target_groups(
             Names=[name]
         )
-    except Exception:
+    except ClientError as err:
+        if error_code(err) != "TargetGroupNotFound":
+            raise
         return None
 
     groups = response.get("TargetGroups", [])
@@ -95,7 +99,9 @@ def find_load_balancer(
                 Names=[name]
             )
         )
-    except Exception:
+    except ClientError as err:
+        if error_code(err) != "LoadBalancerNotFound":
+            raise
         return None
 
     lbs = response.get(
@@ -124,8 +130,6 @@ def ensure_load_balancer(
             settings.alb_name,
         )
 
-        # Make sure an existing ALB is active before
-        # later code uses its DNS name.
         waiter = aws.elbv2.get_waiter(
             "load_balancer_available"
         )
@@ -272,10 +276,6 @@ def delete_load_balancer(
             aws,
             settings.alb_name,
         ):
-            from botocore.exceptions import (
-                ClientError,
-            )
-
             raise ClientError(
                 {
                     "Error": {
