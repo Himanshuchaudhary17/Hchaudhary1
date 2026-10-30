@@ -187,8 +187,7 @@ def test_database_security_group_allows_only_5432_from_app(
 
     source_groups = [
         pair["GroupId"]
-        for pair
-        in rule["UserIdGroupPairs"]
+        for pair in rule["UserIdGroupPairs"]
     ]
 
     assert source_groups == [
@@ -209,7 +208,6 @@ def test_database_is_private_encrypted_single_az_no_backups(
     assert db["MultiAZ"] is False
     assert db["StorageEncrypted"] is True
     assert db["BackupRetentionPeriod"] == 0
-
     assert db["DBInstanceClass"] == "db.t4g.micro"
 
 
@@ -317,3 +315,61 @@ def test_every_target_becomes_healthy(
         timeout=420,
         interval=15,
     ), "targets never became healthy"
+
+
+def test_iam_policy_simulator_enforces_least_privilege(
+    aws,
+    settings,
+):
+    """Each tier may read only its own SSM secret."""
+
+    account_id = aws.sts.get_caller_identity()["Account"]
+
+    weather_role_arn = (
+        f"arn:aws:iam::{account_id}:role/"
+        f"{settings.weather.role_name}"
+    )
+
+    advisor_role_arn = (
+        f"arn:aws:iam::{account_id}:role/"
+        f"{settings.advisor.role_name}"
+    )
+
+    db_parameter_arn = (
+        f"arn:aws:ssm:{settings.region}:{account_id}:"
+        f"parameter{settings.db_password_param}"
+    )
+
+    gemini_parameter_arn = (
+        f"arn:aws:ssm:{settings.region}:{account_id}:"
+        f"parameter{settings.gemini_param_name}"
+    )
+
+    def decision(role_arn, resource_arn):
+        result = aws.iam.simulate_principal_policy(
+            PolicySourceArn=role_arn,
+            ActionNames=["ssm:GetParameter"],
+            ResourceArns=[resource_arn],
+        )
+
+        return result["EvaluationResults"][0]["EvalDecision"]
+
+    assert decision(
+        weather_role_arn,
+        db_parameter_arn,
+    ) == "allowed"
+
+    assert decision(
+        weather_role_arn,
+        gemini_parameter_arn,
+    ) != "allowed"
+
+    assert decision(
+        advisor_role_arn,
+        gemini_parameter_arn,
+    ) == "allowed"
+
+    assert decision(
+        advisor_role_arn,
+        db_parameter_arn,
+    ) != "allowed"
