@@ -88,7 +88,7 @@ def test_weather_survives_database_outage(
     settings,
     outputs,
 ):
-    """Weather must still work if PostgreSQL is unreachable."""
+    """Weather must still work if PostgreSQL is unreachable after restart."""
 
     weather_url = _weather_url(
         settings,
@@ -98,6 +98,15 @@ def test_weather_survives_database_outage(
     db_sg_id = _db_security_group_id(
         aws,
         settings,
+    )
+
+    weather_instance = _in_service_weather_instance(
+        aws,
+        settings,
+    )
+
+    assert weather_instance, (
+        "No in-service Weather instance found"
     )
 
     permission = {
@@ -118,7 +127,16 @@ def test_weather_survives_database_outage(
             IpPermissions=[permission],
         )
 
-        time.sleep(5)
+        aws.ec2.reboot_instances(
+            InstanceIds=[weather_instance]
+        )
+
+        print(
+            "\nRevoked DB access and restarted "
+            f"Weather instance: {weather_instance}"
+        )
+
+        time.sleep(30)
 
         response = requests.get(
             weather_url + "weather",
@@ -179,7 +197,6 @@ def test_weather_instance_failure_causes_502_then_recovers(
         "No in-service Weather instance found"
     )
 
-    # Confirm healthy before chaos begins.
     before = requests.get(
         weather_url + "weather",
         params={"zip": "60616"},
