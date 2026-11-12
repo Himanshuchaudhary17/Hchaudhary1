@@ -26,15 +26,18 @@ Terraform was used to define and manage:
 - Security Groups
 - AWS Systems Manager Parameter Store
 - User-data configuration
-- Terraform outputs and state
+- Terraform outputs
+- Terraform state
 
-The lab demonstrated Terraform concepts such as declarative infrastructure, idempotence, dependency management, state tracking, drift detection, targeted updates, IAM least privilege, graceful failure handling, and infrastructure destruction.
+The lab demonstrated Terraform concepts such as declarative infrastructure, idempotence, dependency management, state tracking, drift detection, targeted updates, IAM least privilege, graceful failure handling, and complete infrastructure destruction.
 
 ---
 
 # Part A — First Terraform Experience
 
-Terraform uses a declarative approach. Instead of manually specifying each AWS API call, the Terraform configuration describes the desired final infrastructure.
+Terraform uses a declarative approach.
+
+Instead of manually specifying each AWS API call, the Terraform configuration describes the desired final infrastructure.
 
 Terraform then compares:
 
@@ -57,7 +60,13 @@ Important Terraform plan symbols are:
 | `-/+` | Destroy and recreate a resource |
 | `No changes` | Infrastructure already matches configuration |
 
-A second Terraform run showing `No changes` demonstrates idempotence.
+A second Terraform run showing:
+
+```text
+No changes.
+```
+
+demonstrates idempotence.
 
 Idempotence means applying the same configuration repeatedly does not keep changing infrastructure after the desired state has been reached.
 
@@ -139,9 +148,11 @@ During deployment, additional IAM permissions were temporarily required for SSM 
 
 ### Screenshot Path
 
-```text
-screenshots/01_troubleshooting_iam_ssm_tag_access_policy.png
-```
+`screenshots/01_troubleshooting_iam_ssm_tag_access_policy.png`
+
+### Screenshot
+
+![IAM SSM tag access troubleshooting](screenshots/01_troubleshooting_iam_ssm_tag_access_policy.png)
 
 ### Explanation
 
@@ -161,9 +172,11 @@ The temporary permission was removed after completing the lab.
 
 ### Screenshot Path
 
-```text
-screenshots/02_manual_weather_cache_and_gemini_test.png
-```
+`screenshots/02_manual_weather_cache_and_gemini_test.png`
+
+### Screenshot
+
+![Manual weather cache and Gemini test](screenshots/02_manual_weather_cache_and_gemini_test.png)
 
 ### Explanation
 
@@ -193,9 +206,11 @@ The Advisor also successfully communicated with Gemini using the API key stored 
 
 ### Screenshot Path
 
-```text
-screenshots/03_smoke_test_9_of_9_passed.png
-```
+`screenshots/03_smoke_test_9_of_9_passed.png`
+
+### Screenshot
+
+![Smoke test 9 of 9 passed](screenshots/03_smoke_test_9_of_9_passed.png)
 
 ### Explanation
 
@@ -213,13 +228,15 @@ Passing all nine checks confirms that the Terraform-created environment was oper
 
 # Part F — Terraform Experiments
 
-# Step 1 — Compare Infrastructure Effort
+## Step 1 — Compare Infrastructure Effort
 
 ### Screenshot Path
 
-```text
-screenshots/04_step1_effort_line_counts.png
-```
+`screenshots/04_step1_effort_line_counts.png`
+
+### Screenshot
+
+![Step 1 effort line counts](screenshots/04_step1_effort_line_counts.png)
 
 ### Explanation
 
@@ -252,13 +269,15 @@ Therefore, Terraform's main advantage is not simply fewer lines of code. Its adv
 
 ---
 
-# Step 2 — Terraform Dependency Graph
+## Step 2 — Terraform Dependency Graph
 
 ### Screenshot Path
 
-```text
-screenshots/05_step2_terraform_dependency_graph.png
-```
+`screenshots/05_step2_terraform_dependency_graph.png`
+
+### Screenshot
+
+![Terraform dependency graph](screenshots/05_step2_terraform_dependency_graph.png)
 
 ### Explanation
 
@@ -282,13 +301,15 @@ Terraform dependencies help determine the correct order for infrastructure creat
 
 ---
 
-# Step 3 — Terraform Idempotence
+## Step 3 — Terraform Idempotence
 
 ### Screenshot Path
 
-```text
-screenshots/06_step3_no_changes_idempotence.png
-```
+`screenshots/06_step3_no_changes_idempotence.png`
+
+### Screenshot
+
+![Terraform no changes and idempotence](screenshots/06_step3_no_changes_idempotence.png)
 
 ### Explanation
 
@@ -304,15 +325,9 @@ Terraform compared the desired configuration against both Terraform state and th
 
 Because everything already matched, Terraform did not perform unnecessary changes.
 
-This is more reliable than manually checking whether a resource merely exists.
-
-A resource may exist but still have incorrect configuration.
-
-Terraform checks the resource configuration instead of only its existence.
-
 ---
 
-# Step 4 — Change CACHE_SECONDS
+## Step 4 — Change CACHE_SECONDS
 
 The Weather cache value was temporarily changed to:
 
@@ -320,33 +335,35 @@ The Weather cache value was temporarily changed to:
 CACHE_SECONDS=60
 ```
 
-## Terraform Plan Details
+### Terraform Plan Details
 
-### Screenshot Path
+#### Screenshot Path
 
-```text
-screenshots/07_step4_cache_seconds_plan_details.png
-```
+`screenshots/07_step4_cache_seconds_plan_details.png`
 
-### Explanation
+#### Screenshot
+
+![CACHE_SECONDS Terraform plan details](screenshots/07_step4_cache_seconds_plan_details.png)
+
+#### Explanation
 
 This screenshot shows which Terraform resources were affected by the cache configuration change.
 
 Terraform identified that the Weather launch configuration needed to change while unrelated infrastructure could remain unchanged.
 
-This demonstrates Terraform's ability to calculate targeted changes.
-
 ---
 
-## Terraform Plan Summary
+### Terraform Plan Summary
 
-### Screenshot Path
+#### Screenshot Path
 
-```text
-screenshots/08_step4_cache_seconds_plan_summary.png
-```
+`screenshots/08_step4_cache_seconds_plan_summary.png`
 
-### Explanation
+#### Screenshot
+
+![CACHE_SECONDS plan summary](screenshots/08_step4_cache_seconds_plan_summary.png)
+
+#### Explanation
 
 Terraform showed:
 
@@ -358,37 +375,37 @@ Only two resources required changes.
 
 Terraform did not unnecessarily recreate the entire infrastructure.
 
-This is one of the major benefits of infrastructure state management.
-
 ---
 
-## Auto Scaling Instance Refresh
+### Auto Scaling Instance Refresh
 
-### Screenshot Path
+#### Screenshot Path
 
-```text
-screenshots/09_step4_instance_refresh_started.png
-```
+`screenshots/09_step4_instance_refresh_started.png`
 
-### Explanation
+#### Screenshot
+
+![Weather instance refresh started](screenshots/09_step4_instance_refresh_started.png)
+
+#### Explanation
 
 Changing the launch-template configuration caused the Weather Auto Scaling Group to refresh its EC2 instance.
 
 An Auto Scaling instance refresh gradually replaces old instances with instances created using the latest launch-template configuration.
 
-This allows configuration changes to be deployed while minimizing downtime.
-
 ---
 
-## Verify CACHE_SECONDS
+### Verify CACHE_SECONDS
 
-### Screenshot Path
+#### Screenshot Path
 
-```text
-screenshots/10_step4_cache_seconds_60_verified.png
-```
+`screenshots/10_step4_cache_seconds_60_verified.png`
 
-### Explanation
+#### Screenshot
+
+![CACHE_SECONDS 60 verification](screenshots/10_step4_cache_seconds_60_verified.png)
+
+#### Explanation
 
 The replacement EC2 instance showed:
 
@@ -397,8 +414,6 @@ Environment="CACHE_SECONDS=60"
 ```
 
 This verifies that Terraform successfully propagated the new configuration to the new Weather instance.
-
-It also demonstrates that modifying infrastructure configuration can cause controlled replacement of application instances.
 
 ---
 
@@ -410,9 +425,11 @@ Configuration drift occurs when the actual cloud infrastructure is changed outsi
 
 ### Screenshot Path
 
-```text
-screenshots/11_step5_health_check_drift_plan.png
-```
+`screenshots/11_step5_health_check_drift_plan.png`
+
+### Screenshot
+
+![Weather health-check drift detected](screenshots/11_step5_health_check_drift_plan.png)
 
 ### Explanation
 
@@ -422,17 +439,17 @@ Terraform detected that the real AWS configuration differed from the desired con
 
 It then produced a plan to restore the correct value.
 
-This demonstrates Terraform's ability to detect configuration drift.
-
 ---
 
 ## Target Group Recovery
 
 ### Screenshot Path
 
-```text
-screenshots/12_step5_target_group_recovery.png
-```
+`screenshots/12_step5_target_group_recovery.png`
+
+### Screenshot
+
+![Weather target group recovery](screenshots/12_step5_target_group_recovery.png)
 
 ### Explanation
 
@@ -440,17 +457,17 @@ After Terraform repaired the health-check configuration, the replacement Weather
 
 Target-group health checks are used by the load balancer to determine whether application instances are ready to receive traffic.
 
-A healthy target means the application successfully responds to the configured health-check request.
-
 ---
 
 ## Deleted Advisor Listener
 
 ### Screenshot Path
 
-```text
-screenshots/13_step5_deleted_listener_plan_1_add.png
-```
+`screenshots/13_step5_deleted_listener_plan_1_add.png`
+
+### Screenshot
+
+![Deleted Advisor listener detected](screenshots/13_step5_deleted_listener_plan_1_add.png)
 
 ### Explanation
 
@@ -466,25 +483,21 @@ Plan: 1 to add, 0 to change, 0 to destroy.
 
 Terraform then recreated the listener.
 
-This demonstrates an important difference between Terraform and simple resource-existence scripts.
-
-Terraform continuously compares the desired infrastructure definition with the actual infrastructure.
-
 ---
 
 # Step 6 — IAM Least Privilege
 
 ### Screenshot Path
 
-```text
-screenshots/14_step6_iam_policy_simulator.png
-```
+`screenshots/14_step6_iam_policy_simulator.png`
+
+### Screenshot
+
+![IAM least privilege simulator](screenshots/14_step6_iam_policy_simulator.png)
 
 ### Explanation
 
 The IAM Policy Simulator was used to verify permissions for the Weather and Advisor roles.
-
-The expected results were:
 
 | Role | Action | Result |
 |---|---|---|
@@ -495,13 +508,9 @@ The expected results were:
 
 This demonstrates the principle of least privilege.
 
-Least privilege means giving a component only the permissions required to perform its job.
-
 The Weather service needs DynamoDB access but does not need the Gemini secret.
 
 The Advisor service needs the Gemini secret but does not need direct access to the Weather DynamoDB table.
-
-Separating permissions reduces the damage that could occur if one application tier is compromised.
 
 ---
 
@@ -509,9 +518,11 @@ Separating permissions reduces the damage that could occur if one application ti
 
 ### Screenshot Path
 
-```text
-screenshots/15_step7_no_changes_and_state_key_check.png
-```
+`screenshots/15_step7_no_changes_and_state_key_check.png`
+
+### Screenshot
+
+![Terraform state and API key check](screenshots/15_step7_no_changes_and_state_key_check.png)
 
 ### Explanation
 
@@ -537,13 +548,9 @@ lifecycle {
 }
 ```
 
-This tells Terraform not to treat external changes to the parameter's value as infrastructure drift.
+This tells Terraform not to treat external changes to the parameter value as infrastructure drift.
 
-This is useful when the secret is managed separately from infrastructure.
-
-However, Terraform state must still be treated as sensitive because provider implementations can store resource values inside state.
-
-Terraform state files should therefore never be committed publicly.
+Terraform state should still be protected because providers may store resource values in state.
 
 ---
 
@@ -553,9 +560,11 @@ Terraform state files should therefore never be committed publicly.
 
 ### Screenshot Path
 
-```text
-screenshots/16_step8_fallback_responses.png
-```
+`screenshots/16_step8_fallback_responses.png`
+
+### Screenshot
+
+![Gemini fallback responses](screenshots/16_step8_fallback_responses.png)
 
 ### Explanation
 
@@ -565,19 +574,11 @@ The valid Gemini API key was temporarily replaced with:
 not-a-real-key
 ```
 
-After the application's cache expired, the Advisor was tested twice.
+After the application cache expired, the Advisor was tested twice.
 
-Both requests returned:
-
-```text
-fallback - ...
-```
-
-instead of failing completely.
+Both requests returned fallback advice instead of failing completely.
 
 This demonstrates graceful degradation.
-
-Graceful degradation means an application continues providing reduced functionality when one dependency becomes unavailable.
 
 ---
 
@@ -585,13 +586,15 @@ Graceful degradation means an application continues providing reduced functional
 
 ### Screenshot Path
 
-```text
-screenshots/17_step8_gemini_error_logs.png
-```
+`screenshots/17_step8_gemini_error_logs.png`
+
+### Screenshot
+
+![Gemini error journal logs](screenshots/17_step8_gemini_error_logs.png)
 
 ### Explanation
 
-The Advisor journal contained entries such as:
+The Advisor journal contained:
 
 ```text
 "event":"gemini_error"
@@ -599,11 +602,7 @@ The Advisor journal contained entries such as:
 "reason":"gemini_http_error"
 ```
 
-This proves that Gemini was actually failing while the user continued receiving fallback recommendations.
-
-Logging is important because graceful fallback can otherwise hide service failures.
-
-Without logs or monitoring, operators may not realize that the AI integration is broken.
+This proves that Gemini was failing while the application continued serving fallback recommendations.
 
 ---
 
@@ -611,9 +610,11 @@ Without logs or monitoring, operators may not realize that the AI integration is
 
 ### Screenshot Path
 
-```text
-screenshots/18_step8_gemini_restored.png
-```
+`screenshots/18_step8_gemini_restored.png`
+
+### Screenshot
+
+![Gemini restored successfully](screenshots/18_step8_gemini_restored.png)
 
 ### Explanation
 
@@ -623,7 +624,7 @@ After restoring the valid Gemini API key, the Advisor returned to:
 gemini - ...
 ```
 
-This confirmed that the SSM parameter was restored correctly and the Advisor resumed normal Gemini operation.
+This confirmed that normal Gemini functionality was restored.
 
 ---
 
@@ -631,9 +632,11 @@ This confirmed that the SSM parameter was restored correctly and the Advisor res
 
 ### Screenshot Path
 
-```text
-screenshots/19_advisor_webpage_gemini.png
-```
+`screenshots/19_advisor_webpage_gemini.png`
+
+### Screenshot
+
+![Weather Advisor webpage using Gemini](screenshots/19_advisor_webpage_gemini.png)
 
 ### Explanation
 
@@ -645,19 +648,19 @@ The final Advisor webpage was tested using ZIP code:
 
 The page displayed Chicago weather information and generated a clothing recommendation.
 
-The page showed:
+It showed:
 
 ```text
 Suggestion source: gemini
 ```
 
-This verifies the complete application flow through the web interface.
+This confirms the complete application flow through the web interface.
 
 ---
 
 # Step 9 — EC2 vs Lambda Architecture
 
-The current architecture uses EC2 instances.
+The current architecture uses EC2 instances behind an Application Load Balancer.
 
 A serverless implementation could use AWS Lambda and API Gateway.
 
@@ -674,20 +677,38 @@ A serverless implementation could use AWS Lambda and API Gateway.
 | DynamoDB | DynamoDB can remain |
 | SSM | SSM can remain |
 
-Lambda would simplify server management because there would be no EC2 operating systems, launch templates, systemd services, or instance refreshes.
+## What Would Become Easier?
 
-However, Lambda would not remove the need for:
+Moving from EC2 to Lambda would reduce:
+
+- operating-system management
+- launch templates
+- Auto Scaling Groups
+- systemd services
+- EC2 bootstrapping
+- instance refreshes
+- server patching
+- server lifecycle management
+
+AWS Lambda automatically scales functions based on demand.
+
+API Gateway could replace much of the ALB listener and target-group configuration.
+
+## What Would Still Be Required?
+
+The following would still need management:
 
 - IAM permissions
 - DynamoDB
-- SSM
-- monitoring
-- logging
+- SSM Parameter Store
 - Gemini integration
-- application debugging
-- external API error handling
+- external API failure handling
+- application logic
+- logging
+- monitoring
+- security
 
-Serverless architecture reduces infrastructure administration but does not eliminate application complexity.
+Lambda reduces infrastructure administration but does not eliminate application complexity.
 
 ---
 
@@ -697,24 +718,24 @@ Serverless architecture reduces infrastructure administration but does not elimi
 
 ### Screenshot Path
 
-```text
-screenshots/20_final_no_changes_terraform_version_sts.png
-```
+`screenshots/20_final_no_changes_terraform_version_sts.png`
+
+### Screenshot
+
+![Final Terraform version, no changes and masked STS identity](screenshots/20_final_no_changes_terraform_version_sts.png)
 
 ### Explanation
 
 Before destruction, Terraform reported that no infrastructure changes were required.
 
-The environment also showed:
+The environment showed:
 
 ```text
 Terraform v1.17.2
 AWS Provider v5.100.0
 ```
 
-The AWS account identifier was masked before capturing the screenshot.
-
-This screenshot proves the final Terraform environment and clean infrastructure state before destruction.
+The AWS account identifier was masked.
 
 ---
 
@@ -722,9 +743,11 @@ This screenshot proves the final Terraform environment and clean infrastructure 
 
 ### Screenshot Path
 
-```text
-screenshots/21_step10_destroy_plan_25_resources.png
-```
+`screenshots/21_step10_destroy_plan_25_resources.png`
+
+### Screenshot
+
+![Terraform destroy plan for 25 resources](screenshots/21_step10_destroy_plan_25_resources.png)
 
 ### Explanation
 
@@ -734,9 +757,7 @@ Terraform produced:
 Plan: 0 to add, 0 to change, 25 to destroy.
 ```
 
-The destroy plan allows the operator to review which resources will be removed before executing the actual destruction.
-
-Reviewing the plan reduces the risk of deleting unexpected resources.
+The destroy plan allowed the infrastructure deletion to be reviewed before execution.
 
 ---
 
@@ -744,9 +765,11 @@ Reviewing the plan reduces the risk of deleting unexpected resources.
 
 ### Screenshot Path
 
-```text
-screenshots/22_step10_destroy_complete_25.png
-```
+`screenshots/22_step10_destroy_complete_25.png`
+
+### Screenshot
+
+![Terraform destroy complete](screenshots/22_step10_destroy_complete_25.png)
 
 ### Explanation
 
@@ -756,9 +779,7 @@ Terraform reported:
 Destroy complete! Resources: 25 destroyed.
 ```
 
-This confirms that all 25 Terraform-managed infrastructure resources were successfully removed.
-
-Terraform manages both infrastructure creation and infrastructure destruction from the same declared configuration and state information.
+This confirms that all Terraform-managed resources were successfully removed.
 
 ---
 
@@ -766,13 +787,13 @@ Terraform manages both infrastructure creation and infrastructure destruction fr
 
 ### Screenshot Path
 
-```text
-screenshots/23_step10_cleanup_verification.png
-```
+`screenshots/23_step10_cleanup_verification.png`
+
+### Screenshot
+
+![Terraform and temporary access cleanup verification](screenshots/23_step10_cleanup_verification.png)
 
 ### Explanation
-
-This screenshot confirms several cleanup checks.
 
 The SSM Gemini parameter returned:
 
@@ -788,11 +809,7 @@ terraform state list
 
 returned no resources.
 
-The temporary Lab07 IAM policies had also been deleted.
-
-The temporary SSH key files were removed from the local machine.
-
-This confirms that both AWS and local troubleshooting artifacts were cleaned up.
+The temporary Lab07 IAM policies and temporary SSH key files were also removed.
 
 ---
 
@@ -800,13 +817,15 @@ This confirms that both AWS and local troubleshooting artifacts were cleaned up.
 
 ### Screenshot Path
 
-```text
-screenshots/24_step10_final_aws_resource_checks.png
-```
+`screenshots/24_step10_final_aws_resource_checks.png`
+
+### Screenshot
+
+![Final AWS Lab07 resource verification](screenshots/24_step10_final_aws_resource_checks.png)
 
 ### Explanation
 
-Final AWS CLI checks were performed for:
+Final AWS checks were performed for:
 
 - EC2
 - Load Balancers
@@ -814,13 +833,11 @@ Final AWS CLI checks were performed for:
 - Auto Scaling Groups
 - Launch Templates
 - DynamoDB
-- SSM Parameter Store
+- SSM
 - Security Groups
 - IAM roles
 
 No active Lab07 resources remained.
-
-This confirms that the Terraform infrastructure had been completely removed and that no lab resources were intentionally left running.
 
 ---
 
@@ -828,26 +845,11 @@ This confirms that the Terraform infrastructure had been completely removed and 
 
 ## 1. Why is Terraform declarative?
 
-Terraform is declarative because the configuration describes the desired final infrastructure rather than describing every API operation required to create it.
-
-Terraform calculates the required actions automatically.
-
----
+Terraform is declarative because the configuration describes the desired final infrastructure rather than every API operation needed to create it.
 
 ## 2. What is Terraform state?
 
-Terraform state stores Terraform's understanding of the infrastructure it manages.
-
-It allows Terraform to map Terraform resources to actual AWS resources.
-
-Terraform uses state to determine whether resources must be:
-
-- created
-- updated
-- replaced
-- destroyed
-
----
+Terraform state maps Terraform resources to real infrastructure and allows Terraform to determine whether resources need creation, updates, replacement, or destruction.
 
 ## 3. What is idempotence?
 
@@ -857,118 +859,55 @@ Idempotence means repeatedly applying the same configuration eventually results 
 No changes.
 ```
 
-Once the infrastructure matches the desired configuration, Terraform does not keep changing it.
-
----
-
 ## 4. How does Terraform determine dependencies?
 
-Terraform detects dependencies when resources reference attributes from other resources.
-
-For example, using:
+Terraform detects dependencies through references between resources, such as:
 
 ```text
 aws_lb.main.dns_name
 ```
 
-creates a dependency on the Application Load Balancer.
-
-Terraform uses its dependency graph to determine creation and destruction order.
-
----
-
 ## 5. What is configuration drift?
 
-Configuration drift occurs when someone changes real infrastructure outside Terraform.
-
-Terraform detects differences between the desired configuration and actual AWS resources.
-
-It can then generate a plan to repair those differences.
-
----
+Configuration drift occurs when infrastructure is modified outside Terraform and no longer matches the desired Terraform configuration.
 
 ## 6. Why use `terraform plan`?
 
-`terraform plan` shows what Terraform intends to do before modifying infrastructure.
-
-This allows operators to review:
-
-- creations
-- updates
-- replacements
-- destructions
-
-before applying them.
-
----
+`terraform plan` allows infrastructure changes to be reviewed before applying them.
 
 ## 7. Why protect Terraform state?
 
-Terraform state may contain sensitive configuration details and possibly secret values.
-
-For this reason:
-
-- state files should not be public
-- state should not be committed to GitHub
-- production state should use secure remote storage and access controls
-
----
+Terraform state can contain sensitive resource information and potentially secret values, so it should not be committed publicly.
 
 ## 8. Why use `ignore_changes`?
 
-`ignore_changes` allows an attribute to be modified outside Terraform without Terraform constantly trying to restore the original configured value.
-
-This was useful for the Gemini SSM parameter because the real secret was managed outside Terraform.
-
----
+`ignore_changes` lets selected resource attributes be changed externally without Terraform attempting to restore their original values.
 
 ## 9. How was Terraform different from Python?
 
-The previous Python approach required custom logic for:
-
-- creation
-- existence checks
-- ordering
-- updating
-- deletion
-
-Terraform provides built-in:
-
-- state management
-- dependency resolution
-- drift detection
-- idempotence
-- destruction planning
-
-This makes the infrastructure lifecycle easier to manage consistently.
-
----
+Terraform provides built-in state management, dependency resolution, idempotence, drift detection, and destruction planning that would otherwise require custom code.
 
 ## 10. What does Terraform not solve?
 
-Terraform manages infrastructure, but it does not replace application monitoring.
+Terraform manages infrastructure but does not replace application monitoring.
 
-For example, the Gemini API failed while AWS infrastructure remained operational.
-
-Terraform did not consider this infrastructure drift.
-
-Application logs and monitoring were needed to detect:
+Application-level failures such as:
 
 ```text
 gemini_error
 ```
 
-Therefore, infrastructure management and application observability are separate concerns.
+still require application logs and observability.
 
 ---
 
 # Cost and Cleanup
 
-The AWS infrastructure was active only while completing the lab.
+The AWS infrastructure was active only during the lab.
 
-The primary potentially billable resources included:
+Potentially billable resources included:
 
-- EC2 instances
+- EC2
 - Application Load Balancer
 - DynamoDB usage
 
@@ -980,8 +919,6 @@ Destroy complete! Resources: 25 destroyed.
 
 Final AWS checks confirmed that no Lab07 infrastructure remained active.
 
-Therefore, there should be no continuing Lab07 infrastructure charges after cleanup.
-
 ---
 
 # Final Result
@@ -991,15 +928,15 @@ The Terraform Weather Advisor lab was successfully completed.
 The lab demonstrated:
 
 - Terraform deployment
-- infrastructure state management
+- state management
 - idempotence
-- dependency graphs
+- dependency management
 - targeted configuration changes
-- Auto Scaling instance refresh
-- drift detection
+- Auto Scaling refresh
+- configuration drift detection
 - drift repair
 - IAM least privilege
-- external secret management
+- secret management
 - graceful Gemini fallback
 - application logging
 - infrastructure destruction
