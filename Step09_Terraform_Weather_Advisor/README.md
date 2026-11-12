@@ -76,7 +76,6 @@ The account number was hidden from submitted evidence as required.
 The final Terraform version and masked AWS identity are also shown later in the Step 10 evidence.
 
 ---
-
 # 3. Part A — First Taste of Terraform
 
 Part A demonstrated the basic Terraform workflow on a very small example before building the complete Weather Advisor infrastructure.
@@ -111,11 +110,21 @@ Terraform had not yet applied the desired state, so the resource appeared with t
 
 After applying the configuration once, the same configuration was applied again.
 
+### Screenshot Path
+
+`screenshots/00b_partA_second_apply_no_changes.png`
+
+### Screenshot
+
+![Part A second apply - no changes](screenshots/00b_partA_second_apply_no_changes.png)
+
+### Evidence
+
 The second application resulted in:
 
 ```text
-No changes.
-Your infrastructure matches the configuration.
+No changes. Your infrastructure matches the configuration.
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
 ```
 
 This demonstrates **idempotence**.
@@ -128,41 +137,75 @@ This is an important improvement over imperative automation because Terraform co
 
 ## Part A.3 — In-Place Update
 
-A tag value was changed during the Part A experiment.
+A tag was added to the DynamoDB resource:
+
+```text
+Purpose = "first-taste"
+```
+
+### Screenshot Path
+
+`screenshots/00c_partA_in_place_update.png`
+
+### Screenshot
+
+![Part A in-place update](screenshots/00c_partA_in_place_update.png)
+
+### Evidence
 
 Terraform represented the modification using:
 
 ```text
-~
+~ update in-place
 ```
 
-The `~` symbol means:
+The plan showed:
 
 ```text
-update in-place
++ "Purpose" = "first-taste"
+
+Plan: 0 to add, 1 to change, 0 to destroy.
 ```
 
-The existing resource does not have to be destroyed. Terraform can modify the appropriate property while preserving the same underlying resource.
+The `~` symbol means that Terraform can modify the existing resource without destroying and recreating it.
+
+The DynamoDB table remained the same underlying resource while Terraform updated its tag configuration.
 
 ---
 
 ## Part A.4 — Replacement Plan
 
-A property that required resource replacement was then changed.
+The DynamoDB partition key was changed from `id` to `name`.
 
-Terraform represented the change with:
+### Screenshot Path
+
+`screenshots/00d_partA_replacement_plan.png`
+
+### Screenshot
+
+![Part A replacement plan](screenshots/00d_partA_replacement_plan.png)
+
+### Evidence
+
+Terraform represented the change using:
 
 ```text
--/+
+-/+ destroy and then create replacement
 ```
 
-This means:
+The plan showed that the `hash_key` change forced replacement of the DynamoDB table:
 
 ```text
-destroy and then create replacement
+hash_key = "id" -> "name" # forces replacement
 ```
 
-The replacement change was not applied during the experiment.
+Terraform therefore planned:
+
+```text
+Plan: 1 to add, 0 to change, 1 to destroy.
+```
+
+The replacement change was **not applied** during the experiment.
 
 ### Why `-/+` Requires Special Attention
 
