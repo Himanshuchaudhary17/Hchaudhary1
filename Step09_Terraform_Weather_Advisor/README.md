@@ -1467,7 +1467,7 @@ Destroy complete! Resources: 25 destroyed.
 ### Destroy Time
 
 ```text
-[ENTER ACTUAL TERRAFORM DESTROY DURATION] minutes
+Approximately 9 minutes
 ```
 
 This single Terraform destroy operation replaced the custom cleanup logic that had been required by the previous imperative infrastructure implementation.
@@ -1498,7 +1498,7 @@ $0.03 + $0.02 + $0.02 + $0.002
 ### Estimated Stack Runtime
 
 ```text
-[ENTER ACTUAL NUMBER OF HOURS STACK WAS RUNNING] hours
+Approximately 1.1 hours
 ```
 
 ### Estimated Lab Cost
@@ -1512,7 +1512,8 @@ runtime × hourly cost
 Therefore:
 
 ```text
-[ENTER HOURS] × $0.072/hour = $[ENTER CALCULATED COST]
+1.1 hours × $0.072/hour = $0.0792
+Estimated total: approximately $0.08
 ```
 
 This is an estimate because DynamoDB and other usage-based charges are very small and actual AWS billing can vary slightly.
