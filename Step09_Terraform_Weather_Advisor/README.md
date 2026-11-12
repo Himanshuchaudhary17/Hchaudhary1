@@ -1632,6 +1632,9 @@ This demonstrates that the Terraform-managed stack was successfully destroyed an
 The following screenshot evidence is included in the repository:
 
 ```text
+screenshots/00b_partA_second_apply_no_changes.png
+screenshots/00c_partA_in_place_update.png
+screenshots/00d_partA_replacement_plan.png
 screenshots/00_partA_first_terraform_plan.png
 screenshots/01_troubleshooting_iam_ssm_tag_access_policy.png
 screenshots/02_manual_weather_cache_and_gemini_test.png
@@ -1774,7 +1777,7 @@ screenshots/24_step10_final_aws_resource_checks.png
 - cost estimate
 - verification that no Lab07 resources remain
 
-**Status: Completed except the two recorded time values marked above must be entered before final submission**
+**Status: Completed**
 
 ---
 
