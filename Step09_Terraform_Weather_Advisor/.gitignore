@@ -1,0 +1,10 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+*.pem
+lab07-temp-key
+lab07-temp-key.pub
+.DS_Store
+tfplan
+*.tfplan
