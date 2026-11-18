@@ -107,6 +107,14 @@ def build_user_data(
                 "STALE_CACHE_SECONDS": str(
                     settings.stale_cache_seconds
                 ),
+
+                "RAIN_HEAVY_MM_PER_HOUR": str(
+                    settings.rain_heavy_mm_per_hour
+                ),
+
+                "SNOW_HEAVY_MM_PER_HOUR": str(
+                    settings.snow_heavy_mm_per_hour
+                ),
             }
         )
 
@@ -146,8 +154,25 @@ def build_user_data(
                     settings.key_cache_seconds
                 ),
 
-                "REPORT_CACHE_SECONDS":
-                    "600",
+                "GEMINI_DAILY_LIMIT": str(
+                    settings.gemini_daily_limit
+                ),
+
+                "VISITOR_REQUEST_LIMIT": str(
+                    settings.visitor_request_limit
+                ),
+
+                "REQUEST_WINDOW_SECONDS": str(
+                    settings.request_window_seconds
+                ),
+
+                "EMAIL_REQUEST_LIMIT": str(
+                    settings.email_request_limit
+                ),
+
+                "REPORT_CACHE_SECONDS": str(
+                    settings.report_cache_seconds
+                ),
             }
         )
 

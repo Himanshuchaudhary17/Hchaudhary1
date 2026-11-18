@@ -360,10 +360,10 @@ The value:
 is approximately:
 
 ```text
-0.30 inches
+0.30 inches/hour
 ```
 
-The final submission will cite the published meteorological reference used to justify the heavy-rain threshold.
+The application uses 7.62 mm/hour as its documented deterministic heavy-rain engineering threshold after normalizing precipitation accumulation by its validTime duration.
 
 ## Boundary Tests
 
@@ -423,25 +423,25 @@ No:
 snowfall amount = 0 mm
 
 Mild:
-snowfall amount > 0 mm and < 50.8 mm
+snow rate > 0 mm/hour and < 8.47 mm/hour
 
 Heavy:
-snowfall amount >= 50.8 mm
+snow rate >= 8.47 mm/hour
 ```
 
 The value:
 
 ```text
-50.8 mm
+8.47 mm/hour
 ```
 
 is approximately:
 
 ```text
-2 inches
+0.33 inches/hour
 ```
 
-The final submission will cite a published source for the selected heavy-snow threshold.
+The application uses 8.47 mm/hour as a documented deterministic engineering threshold after normalizing snowfall accumulation by its validTime duration.
 
 ## Boundary Tests
 
@@ -449,9 +449,9 @@ Tests must include:
 
 ```text
 0 mm
-just below 50.8 mm
-exactly 50.8 mm
-just above 50.8 mm
+8.46 mm/hour
+8.47 mm/hour
+8.48 mm/hour
 ```
 
 ## Missing Data

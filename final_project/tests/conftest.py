@@ -141,6 +141,30 @@ def fake_settings(
         "KEY_CACHE_SECONDS":
             "60",
 
+        "GEMINI_DAILY_LIMIT":
+            "100",
+
+        "VISITOR_REQUEST_LIMIT":
+            "30",
+
+        "REQUEST_WINDOW_SECONDS":
+            "3600",
+
+        "EMAIL_REQUEST_LIMIT":
+            "5",
+
+        "REPORT_CACHE_SECONDS":
+            "600",
+
+        "ASG_HEALTH_CHECK_GRACE_SECONDS":
+            "300",
+
+        "RAIN_HEAVY_MM_PER_HOUR":
+            "7.62",
+
+        "SNOW_HEAVY_MM_PER_HOUR":
+            "8.47",
+
         "CONTACT_EMAIL":
             "student@example.com",
     }

@@ -45,6 +45,15 @@ REQUIRED_KEYS = [
     "GEMINI_MODEL",
     "KEY_CACHE_SECONDS",
 
+    "GEMINI_DAILY_LIMIT",
+    "VISITOR_REQUEST_LIMIT",
+    "REQUEST_WINDOW_SECONDS",
+    "EMAIL_REQUEST_LIMIT",
+    "REPORT_CACHE_SECONDS",
+    "ASG_HEALTH_CHECK_GRACE_SECONDS",
+    "RAIN_HEAVY_MM_PER_HOUR",
+    "SNOW_HEAVY_MM_PER_HOUR",
+
     "CONTACT_EMAIL",
 ]
 
@@ -138,6 +147,17 @@ class Settings:
     gemini_param_name: str
     gemini_model: str
     key_cache_seconds: int
+
+    gemini_daily_limit: int
+    visitor_request_limit: int
+    request_window_seconds: int
+    email_request_limit: int
+    report_cache_seconds: int
+
+    asg_health_check_grace_seconds: int
+
+    rain_heavy_mm_per_hour: float
+    snow_heavy_mm_per_hour: float
 
     contact_email: str
 
@@ -306,6 +326,54 @@ class Settings:
             key_cache_seconds=int(
                 v[
                     "KEY_CACHE_SECONDS"
+                ]
+            ),
+
+            gemini_daily_limit=int(
+                v[
+                    "GEMINI_DAILY_LIMIT"
+                ]
+            ),
+
+            visitor_request_limit=int(
+                v[
+                    "VISITOR_REQUEST_LIMIT"
+                ]
+            ),
+
+            request_window_seconds=int(
+                v[
+                    "REQUEST_WINDOW_SECONDS"
+                ]
+            ),
+
+            email_request_limit=int(
+                v[
+                    "EMAIL_REQUEST_LIMIT"
+                ]
+            ),
+
+            report_cache_seconds=int(
+                v[
+                    "REPORT_CACHE_SECONDS"
+                ]
+            ),
+
+            asg_health_check_grace_seconds=int(
+                v[
+                    "ASG_HEALTH_CHECK_GRACE_SECONDS"
+                ]
+            ),
+
+            rain_heavy_mm_per_hour=float(
+                v[
+                    "RAIN_HEAVY_MM_PER_HOUR"
+                ]
+            ),
+
+            snow_heavy_mm_per_hour=float(
+                v[
+                    "SNOW_HEAVY_MM_PER_HOUR"
                 ]
             ),
 

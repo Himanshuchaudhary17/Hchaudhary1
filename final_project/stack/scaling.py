@@ -55,7 +55,7 @@ def ensure_asg(
             DesiredCapacity=1,
             VPCZoneIdentifier=f"{subnet_a},{subnet_b}",
             HealthCheckType="ELB",
-            HealthCheckGracePeriod=120,
+            HealthCheckGracePeriod=settings.asg_health_check_grace_seconds,
         )
 
         current_tgs = existing.get(
@@ -89,7 +89,7 @@ def ensure_asg(
             target_group_arn
         ],
         HealthCheckType="ELB",
-        HealthCheckGracePeriod=120,
+        HealthCheckGracePeriod=settings.asg_health_check_grace_seconds,
         Tags=[
             {
                 "Key": "Name",
