@@ -1908,8 +1908,48 @@ async function publishReport(
 
 function emailStatusPage(
   title,
-  message
+  message,
+  retry = null
 ) {
+  const retryHtml =
+    retry &&
+    retry.email &&
+    retry.reportToken
+      ? `
+        <form
+          method="POST"
+          action="/email"
+        >
+          <input
+            type="hidden"
+            name="email"
+            value="${escapeHtml(
+              retry.email
+            )}"
+          >
+
+          <input
+            type="hidden"
+            name="report_token"
+            value="${escapeHtml(
+              retry.reportToken
+            )}"
+          >
+
+          <button
+            type="submit"
+          >
+            I've Confirmed — Send My Report
+          </button>
+        </form>
+
+        <p>
+          After confirming the Amazon SNS subscription from your inbox,
+          return to this page and press the button above.
+        </p>
+      `
+      : '';
+
   return `
 <!doctype html>
 
@@ -1940,9 +1980,11 @@ function emailStatusPage(
       ${escapeHtml(message)}
     </p>
 
+    ${retryHtml}
+
     <p>
       <a href="/">
-        Return to Weather Advisor
+        Start a New Weather Report
       </a>
     </p>
 
@@ -2989,7 +3031,11 @@ app.post(
       return res.send(
         emailStatusPage(
           'Confirmation Required',
-          'A confirmation message was requested from Amazon SNS. Open that email and confirm the subscription, then return to the report and press Email This Report again.'
+          'Amazon SNS sent a subscription confirmation message to your email. Confirm it from your inbox, then return to this page and press the button below. Your generated report is temporarily saved for 15 minutes.',
+          {
+            email,
+            reportToken,
+          }
         )
       );
     }
