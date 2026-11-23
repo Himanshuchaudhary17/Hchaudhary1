@@ -54,10 +54,16 @@ The Node.js applications listen internally on `APP_PORT=3000`. The public ALB li
 final_project/
 ├── advisor-app/
 │   ├── app.js
-│   └── package.json
+│   ├── package.json
+│   └── test/
+│       └── rubric.test.js
 ├── weather-app/
 │   ├── app.js
-│   └── package.json
+│   ├── package.json
+│   └── test/
+│       ├── app.test.js
+│       ├── rubric.test.js
+│       └── fixtures/
 ├── stack/
 │   ├── balancer.py
 │   ├── clients.py
@@ -70,12 +76,14 @@ final_project/
 │   ├── policies.py
 │   ├── runner.py
 │   ├── scaling.py
-│   └── storage.py
+│   ├── storage.py
+│   └── util.py
 ├── tests/
 │   ├── unit/
 │   └── integration/
 ├── testing/
 │   └── app_smoke_test.py
+├── docs/
 ├── screenshots/
 ├── create_weather_stack.py
 ├── delete_weather_stack.py
@@ -287,28 +295,78 @@ The project contains multiple levels of testing.
 
 ### Python Unit Tests
 
-Unit tests validate configuration, IAM policy generation, DynamoDB helpers, stack behavior, Launch Template data, and EC2 user-data generation.
+The Python offline test suite validates configuration, IAM policy generation, DynamoDB helpers, stack behavior, Launch Template data, EC2 user-data generation, TTL configuration, idempotency, and least-privilege policy rules.
 
 Final recorded result:
 
 ```text
-32 passed in 1.71s
+32 passed
 ```
 
 Evidence: `screenshots/19_unit_tests_passed.png`
 
-### Weather Node.js Tests
+### Advisor Node.js Tests
 
-The Weather service has Node.js tests for rain/snow classification boundaries, duration parsing, and precipitation normalization.
+The Advisor service includes offline Node.js tests covering:
+
+- five-digit US ZIP validation, including rejection of Canadian, UK, malformed, and wrong-length postal codes
+- real calendar-date validation
+- fixed clothing categories and free-text rejection
+- email validation
+- HTML escaping
+- Gemini structured-response validation
+- malformed, missing-key, extra-key, wrong-type, overlong, and measured-number Gemini responses
+- deterministic rule-based fallback advice
+- Gemini prompt privacy, including exclusion of the user's email address
+- recipient-hash normalization
+- requester/recipient isolation checks for the SNS email workflow
+- atomic DynamoDB condition checks for the Gemini daily-call cap
+- plain-text email report generation
 
 Final recorded result:
 
 ```text
-12 passed
+18 passed
 0 failed
 ```
 
-Evidence: `screenshots/24_rain_snow_boundary_tests_passed.png`
+Evidence: `screenshots/38_advisor_tests_18_passed.png`
+
+### Weather Node.js Tests
+
+The Weather service includes offline Node.js tests covering:
+
+- Rain and Snow classification boundaries
+- precipitation-duration normalization
+- date validation
+- ZIP-location timezone handling
+- daylight-saving-time fallback behavior
+- calendar-day arithmetic
+- recorded contract fixtures for Zippopotam, NWS points, NWS hourly forecasts, and Open-Meteo
+- missing-field handling without converting missing values to zero
+- Morning-period source selection and aggregation
+- degraded supplemental-source behavior
+
+Final recorded result:
+
+```text
+28 passed
+0 failed
+```
+
+Evidence: `screenshots/39_weather_and_python_tests_passed.png`
+
+### Local Automated Test Summary
+
+The complete offline test set can run without a deployed AWS stack.
+
+```text
+Advisor Node.js: 18 passed
+Weather Node.js: 28 passed
+Python pytest:    32 passed
+---------------------------
+Total:            78 passed
+```
 
 ### Deployed Integration Tests
 
@@ -317,7 +375,7 @@ Integration tests validate the live AWS deployment, including target-group healt
 Final recorded result:
 
 ```text
-16 passed in 3.19s
+16 passed
 ```
 
 Evidence: `screenshots/25_version3_live_integration_passed.png`
@@ -326,16 +384,10 @@ Evidence: `screenshots/25_version3_live_integration_passed.png`
 
 The Advisor `/health` endpoint is measured through the public Application Load Balancer using 20 samples after a warm-up request.
 
-Final measured values:
+Recorded result:
 
 ```text
-Minimum: 21.34 ms
-Median:  27.93 ms
-Average: 32.06 ms
-P95:     36.08 ms
-Maximum: 116.12 ms
-
-SLO target: 120.00 ms average
+Average latency: below 120 ms target
 SLO RESULT: PASS
 ```
 
@@ -370,7 +422,6 @@ Project target (< $2.00): PASS
 Evidence: `screenshots/27_cost_budget_passed.png`
 
 ## Screenshots / Evidence
-
 
 The `screenshots/` folder contains the complete final project evidence set.
 
@@ -518,9 +569,23 @@ The `screenshots/` folder contains the complete final project evidence set.
 
 ![Initial deployed integration test pass](screenshots/20_integration_tests_passed_initial.png)
 
-**12 Weather Node.js tests passed**
+**Earlier Weather Node.js boundary tests: 12 passed**
 
-![12 Weather Node.js tests passed](screenshots/24_rain_snow_boundary_tests_passed.png)
+![Earlier Weather Node.js boundary tests](screenshots/24_rain_snow_boundary_tests_passed.png)
+
+**Final Advisor Node.js tests: 18 passed**
+
+![18 Advisor Node.js tests passed](screenshots/38_advisor_tests_18_passed.png)
+
+**Final Weather Node.js tests: 28 passed, with Python offline suite also passing**
+
+![28 Weather Node.js tests and 32 Python offline tests passed](screenshots/39_weather_and_python_tests_passed.png)
+
+**Final local automated test total: 78 passed**
+
+- Advisor Node.js: 18
+- Weather Node.js: 28
+- Python pytest: 32
 
 **Final live integration tests: 16 passed**
 
@@ -533,7 +598,6 @@ The `screenshots/` folder contains the complete final project evidence set.
 **Cost budget estimate passed**
 
 ![Cost budget estimate passed](screenshots/27_cost_budget_passed.png)
-
 
 ## Teardown
 
@@ -558,7 +622,7 @@ The teardown logic removes resources in dependency-aware order, including Auto S
 - systemd process recovery
 - ASG instance-level self-healing
 - Automated deployment and teardown
-- Unit, integration, smoke, and latency testing
+- Unit, integration, smoke, contract, and latency testing
 
 ## Course
 
