@@ -41,8 +41,8 @@ def _archive_b85(
 
     with tarfile.open(
         fileobj=buffer,
-        mode="w:gz",
-        compresslevel=9,
+        mode="w:xz",
+        preset=9,
     ) as archive:
         for name, content in files.items():
             info = tarfile.TarInfo(
@@ -248,7 +248,7 @@ def main():
 
     with tarfile.open(
         fileobj=io.BytesIO(data),
-        mode="r:gz",
+        mode="r:xz",
     ) as archive:
         archive.extractall("/")
 

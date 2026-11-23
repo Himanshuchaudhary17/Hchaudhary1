@@ -46,7 +46,7 @@ def extract_archive(
         fileobj=io.BytesIO(
             compressed
         ),
-        mode="r:gz",
+        mode="r:xz",
     ) as archive:
         for member in (
             archive.getmembers()
