@@ -371,7 +371,6 @@ Evidence: `screenshots/27_cost_budget_passed.png`
 
 ## Screenshots / Evidence
 
-> **Note:** Some screenshots contain AWS resource identifiers, account identifiers, live endpoint names, or personal email addresses. Remove or redact those details before publishing the repository publicly if you do not want them exposed.
 
 The `screenshots/` folder contains the complete final project evidence set.
 
