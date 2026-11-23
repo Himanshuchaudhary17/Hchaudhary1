@@ -1997,6 +1997,88 @@ function emailStatusPage(
 }
 
 
+function forecastDateOptions(
+  selectedDate = ''
+) {
+  const options = [];
+  const formatter =
+    new Intl.DateTimeFormat(
+      'en-US',
+      {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      }
+    );
+
+  for (
+    let offset = 0;
+    offset < 7;
+    offset++
+  ) {
+    const current =
+      new Date();
+
+    current.setHours(
+      12,
+      0,
+      0,
+      0
+    );
+
+    current.setDate(
+      current.getDate() +
+      offset
+    );
+
+    const year =
+      current.getFullYear();
+
+    const month =
+      String(
+        current.getMonth() + 1
+      ).padStart(
+        2,
+        '0'
+      );
+
+    const day =
+      String(
+        current.getDate()
+      ).padStart(
+        2,
+        '0'
+      );
+
+    const value =
+      `${year}-${month}-${day}`;
+
+    let label =
+      formatter.format(
+        current
+      );
+
+    if (offset === 0) {
+      label =
+        `Today — ${label}`;
+    } else if (offset === 1) {
+      label =
+        `Tomorrow — ${label}`;
+    }
+
+    options.push(
+      `<option value="${value}" ${
+        selectedDate === value
+          ? 'selected'
+          : ''
+      }>${label}</option>`
+    );
+  }
+
+  return options.join('');
+}
+
+
 function formPage(
   {
     errors = [],
@@ -2141,6 +2223,12 @@ function formPage(
       font-size: 16px;
     }
 
+    .field-help {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
     button {
       margin-top: 18px;
       padding:
@@ -2234,16 +2322,23 @@ function formPage(
 
         <div>
           <label for="date">
-            Date
+            Forecast date
           </label>
 
-          <input
+          <select
             id="date"
             name="date"
-            type="date"
-            value="${date}"
             required
           >
+            <option value="">
+              Choose a forecast date
+            </option>
+            ${forecastDateOptions(date)}
+          </select>
+
+          <div class="field-help">
+            Choose today or one of the next 6 days.
+          </div>
         </div>
 
         <div>
