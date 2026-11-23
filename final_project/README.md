@@ -303,7 +303,9 @@ Final recorded result:
 32 passed
 ```
 
-Evidence: `screenshots/19_unit_tests_passed.png`
+Evidence:
+
+![32 Python unit tests passed](screenshots/19_unit_tests_passed.png)
 
 ### Advisor Node.js Tests
 
@@ -330,7 +332,9 @@ Final recorded result:
 0 failed
 ```
 
-Evidence: `screenshots/38_advisor_tests_18_passed.png`
+Evidence:
+
+![18 Advisor Node.js tests passed](screenshots/38_advisor_tests_18_passed.png)
 
 ### Weather Node.js Tests
 
@@ -354,7 +358,9 @@ Final recorded result:
 0 failed
 ```
 
-Evidence: `screenshots/39_weather_and_python_tests_passed.png`
+Evidence:
+
+![28 Weather Node.js tests and 32 Python offline tests passed](screenshots/39_weather_and_python_tests_passed.png)
 
 ### Local Automated Test Summary
 
@@ -378,7 +384,9 @@ Final recorded result:
 16 passed
 ```
 
-Evidence: `screenshots/25_version3_live_integration_passed.png`
+Evidence:
+
+![Final live integration tests: 16 passed](screenshots/25_version3_live_integration_passed.png)
 
 ### SLI / SLO
 
@@ -391,7 +399,9 @@ Average latency: below 120 ms target
 SLO RESULT: PASS
 ```
 
-Evidence: `screenshots/26_sli_120ms_passed.png`
+Evidence:
+
+![SLI/SLO latency test passed](screenshots/26_sli_120ms_passed.png)
 
 ### Chaos / Self-Healing Recovery
 
@@ -404,7 +414,9 @@ Recovery time: 202 seconds
 Weather health after recovery: OK
 ```
 
-Evidence: `screenshots/21_chaos_recovery_passed.png`
+Evidence:
+
+![Auto Scaling self-healing after instance failure](screenshots/21_chaos_recovery_passed.png)
 
 ### Cost Budget
 
@@ -419,7 +431,9 @@ Hourly target (< $0.07): PASS
 Project target (< $2.00): PASS
 ```
 
-Evidence: `screenshots/27_cost_budget_passed.png`
+Evidence:
+
+![Cost budget estimate passed](screenshots/27_cost_budget_passed.png)
 
 ## Screenshots / Evidence
 
