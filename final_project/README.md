@@ -54,10 +54,10 @@ The Node.js applications listen internally on `APP_PORT=3000`. The public ALB li
 final_project/
 ├── advisor-app/
 │   ├── app.js
-│   └── package.json
+│   └── package.jsonon
 ├── weather-app/
 │   ├── app.js
-│   └── package.json
+│   └── package.jsonon
 ├── stack/
 │   ├── balancer.py
 │   ├── clients.py
