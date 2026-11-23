@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "quantitativePrecipitation": {
+      "values": [
+        {
+          "validTime": "2026-11-23T12:00:00+00:00/PT6H",
+          "value": 0
+        }
+      ]
+    },
+    "snowfallAmount": {
+      "values": [
+        {
+          "validTime": "2026-11-23T12:00:00+00:00/PT6H",
+          "value": 0
+        }
+      ]
+    },
+    "visibility": {
+      "values": []
+    }
+  }
+}

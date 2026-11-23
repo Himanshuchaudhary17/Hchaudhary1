@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "quantitativePrecipitation": {
+      "values": []
+    },
+    "snowfallAmount": {
+      "values": []
+    },
+    "visibility": {
+      "values": []
+    }
+  }
+}

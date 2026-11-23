@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "timeZone": "America/Chicago",
+    "forecastHourly": "https://api.weather.gov/gridpoints/LOT/76,71/forecast/hourly",
+    "forecastGridData": "https://api.weather.gov/gridpoints/LOT/76,71"
+  }
+}

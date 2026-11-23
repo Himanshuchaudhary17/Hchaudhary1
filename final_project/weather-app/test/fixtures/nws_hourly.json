@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "periods": [
+      {
+        "startTime": "2026-11-23T06:00:00-06:00",
+        "temperature": 33,
+        "windSpeed": "10 mph",
+        "relativeHumidity": {
+          "value": 68
+        },
+        "probabilityOfPrecipitation": {
+          "value": 0
+        }
+      },
+      {
+        "startTime": "2026-11-23T08:00:00-06:00",
+        "temperature": 36,
+        "windSpeed": "15 mph",
+        "relativeHumidity": {
+          "value": 70
+        },
+        "probabilityOfPrecipitation": {
+          "value": 0
+        }
+      },
+      {
+        "startTime": "2026-11-23T11:00:00-06:00",
+        "temperature": 39,
+        "windSpeed": "12 mph",
+        "relativeHumidity": {
+          "value": 72
+        },
+        "probabilityOfPrecipitation": {
+          "value": 0
+        }
+      },
+      {
+        "startTime": "2026-11-23T18:00:00-06:00",
+        "temperature": 38,
+        "windSpeed": "15 mph",
+        "relativeHumidity": {
+          "value": 55
+        },
+        "probabilityOfPrecipitation": {
+          "value": 0
+        }
+      },
+      {
+        "startTime": "2026-11-23T23:00:00-06:00",
+        "temperature": 34,
+        "windSpeed": "12 mph",
+        "relativeHumidity": {
+          "value": 59
+        },
+        "probabilityOfPrecipitation": {
+          "value": 0
+        }
+      }
+    ]
+  }
+}
